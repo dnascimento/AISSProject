@@ -41,15 +41,15 @@ public class Sender {
         try {
             sign = Boolean.parseBoolean(args[0]);
             encrypt = Boolean.parseBoolean(args[1]);
-            timestamp = Boolean.parseBoolean(args[3]);
-            emailTextFilename = args[4];
+            timestamp = Boolean.parseBoolean(args[2]);
+            emailTextFilename = args[3];
         } catch (Exception e) {
             throw new Exception(
                     "Wrong parameters: signed cipher timestamp data  \n ex: false true false jokinaIsMyBestBuddy");
         }
 
         List<String> filesToZip = new ArrayList<String>();
-        for (int i = 5; i < args.length - 2; i++) {
+        for (int i = 4; i < args.length - 2; i++) {
             filesToZip.add(args[i]);
         }
 

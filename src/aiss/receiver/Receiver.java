@@ -1,8 +1,13 @@
 package aiss.receiver;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
+import aiss.AissMime;
 import aiss.shared.CCConnection;
 import aiss.shared.KeyType;
 
@@ -28,32 +33,34 @@ public class Receiver {
         boolean sign;
         boolean encrypt;
         boolean timestamp;
-        String emailTextFilename;
-        String mailFile;
-        String outputEmailText;
+        String inputMailFile;
+        String outMailTextFile;
+        String outZipDirectory;
         try {
             sign = Boolean.parseBoolean(args[0]);
             encrypt = Boolean.parseBoolean(args[1]);
-            timestamp = Boolean.parseBoolean(args[3]);
-            emailTextFilename = args[4];
-            mailFile = args[5];
-            outputEmailText = args[6];
+            timestamp = Boolean.parseBoolean(args[2);
+            inputMailFile = args[3];
+            outMailTextFile = args[4];
         } catch (Exception e) {
             throw new Exception(
                     "Wrong parameters: signed cipher timestamp data  \n ex: false true false jokinaIsMyBestBuddy");
         }
 
         String outputZipDirectory = null;
-        if (args.length == 7) {
-            outputZipDirectory = args[7];
+        if (args.length == 6) {
+            outZipDirectory = args[5];
         }
 
         // Ler o objecto
-
-
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputMailFile));
+        AissMime mimeObj = (AissMime) ois.readObject();
+        ois.close();
+        
+        //TODO Carito:
+        //Processar a leitura do objecto, verificar tudo e escrever nos ficheiros
 
     }
-
 
     public static Boolean checkSignature(
             byte[] clearText,
