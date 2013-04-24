@@ -170,11 +170,16 @@ public class CCConnection {
 
         System.out.println("Got an pkcs11");
         // Open PKCS11 session
-        long p11_session = pkcs11.C_OpenSession(0,
-                                                PKCS11Constants.CKF_SERIAL_SESSION,
-                                                null,
-                                                null);
+        long p11_session;
+        try {
+            p11_session = pkcs11.C_OpenSession(0,
+                                               PKCS11Constants.CKF_SERIAL_SESSION,
+                                               null,
+                                               null);
 
+        } catch (NullPointerException e) {
+            throw new Exception("Insert your Citzen Card");
+        }
         // Token login
         pkcs11.C_Login(p11_session, 1, null);
 

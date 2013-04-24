@@ -1,4 +1,0 @@
-AISSProject
-===========
-
-ProjectAiss
