@@ -7,11 +7,17 @@ import java.io.ObjectInputStream;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+
 import aiss.AissMime;
+import aiss.sender.Sender;
 import aiss.shared.CCConnection;
 import aiss.shared.KeyType;
 
 public class Receiver {
+
+
     private static final KeyType KEY_TYPE = KeyType.Autenticacao;
     private static final String ASSINATURA = "assinatura";
     private static final String AUTENTICACAO = "autenticacao";
@@ -33,19 +39,13 @@ public class Receiver {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        boolean sign;
-        boolean encrypt;
-        boolean timestamp;
         String inputMailObject;
         // Directorio onde vai guardar o email.txt, o directorio zip de anexos e o txt com
         // o resultado das validacoes
-        String outDirectory;
+        String outDirectoryPath;
         try {
-            sign = Boolean.parseBoolean(args[0]);
-            encrypt = Boolean.parseBoolean(args[1]);
-            timestamp = Boolean.parseBoolean(args[2]);
-            inputMailObject = args[3];
-            outDirectory = args[4];
+            inputMailObject = args[0];
+            outDirectoryPath = args[1];
         } catch (Exception e) {
             throw new Exception("Wrong parameters");
         }
@@ -70,6 +70,7 @@ public class Receiver {
         byte[] data;
         // Decifrar os dados
         if (mimeObj.ciphered) {
+            System.out.println("Decipher");
             data = decipherAES(mimeObj.rawdata);
         } else {
             data = mimeObj.rawdata;
@@ -78,6 +79,7 @@ public class Receiver {
 
         // Sacar a assinatura
         if (mimeObj.dataSignLengh != 0) {
+            System.out.println("Checktimestamp");
             int signatureBegin = mimeObj.rawdata.length - mimeObj.dataSignLengh;
 
             byte[][] result = sliptByteArray(mimeObj.rawdata, signatureBegin);
@@ -96,17 +98,24 @@ public class Receiver {
             data = result[DATA];
         }
 
+        File outDirectory = new File(outDirectoryPath);
+        if (outDirectory.exists()) {
+            throw new Exception("Output directory already exists");
+        }
+        outDirectory.mkdirs();
 
         // Split do zip e do texto de email
         File file;
         byte[][] emailAndZip = sliptByteArray(data, mimeObj.emailTextLenght);
         if (emailAndZip[EMAIL].length != 0) {
-            file = new File(outDirectory + File.pathSeparator + "email.txt");
+            System.out.println("Get mail");
+            file = new File(outDirectory, "email.txt");
             byteArrayToFile(emailAndZip[EMAIL], file);
 
         }
         if (emailAndZip[ZIP].length != 0) {
-            file = new File(outDirectory + File.pathSeparator + "data.zip");
+            System.out.println("Get zip");
+            file = new File(outDirectory, "data.zip");
             byteArrayToFile(emailAndZip[ZIP], file);
         }
 
@@ -132,19 +141,17 @@ public class Receiver {
     }
 
 
-    public static byte[] decipherAES(byte[] data) {
-        // TODO
-        return null;
+    public static byte[] decipherAES(byte[] data) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+        cipher.init(Cipher.DECRYPT_MODE, Sender.loadKey(), ivspec);
+        return cipher.doFinal(data);
     }
 
     public static Boolean checkTimeStampSignature(byte[] data, byte[] signature) {
         // TODO
         return true;
-    }
-
-    public static byte[] unzip() {
-        // TODO Carito
-        return null;
     }
 
 
@@ -171,4 +178,5 @@ public class Receiver {
         fos.flush();
         fos.close();
     }
+
 }

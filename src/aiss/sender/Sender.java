@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -15,6 +14,8 @@ import java.security.cert.X509Certificate;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import aiss.AissMime;
 import aiss.shared.AppZip;
@@ -26,6 +27,7 @@ import aiss.shared.KeyType;
  * um timestamp seguro Return do texto como header+email+anexo+certificado
  */
 public class Sender {
+
     private static final String ZIP_TEMP_FILE = "temp.zip";
     private static final int BUFFER_SIZE = 1024;
     // Define the CC certificate
@@ -44,6 +46,7 @@ public class Sender {
         boolean timestamp;
         String emailTextFilename;
         String outputFile;
+        generateSecretKey();
         try {
             sign = Boolean.parseBoolean(args[0]);
             encrypt = Boolean.parseBoolean(args[1]);
@@ -73,6 +76,7 @@ public class Sender {
         mimeObject.emailTextLenght = data.length;
 
         if (arquivoZip != null) {
+            System.out.println("Create archive");
             byte[] zip = readFileToByteArray(arquivoZip);
             mimeObject.zipLenght = zip.length;
             data = concatByteArray(data, zip);
@@ -81,6 +85,7 @@ public class Sender {
 
         // Assinar
         if (sign) {
+            System.out.println("Sign");
             byte[] signature = signDataUsingCC(data);
             mimeObject.dataSignLengh = signature.length;
             data = concatByteArray(data, signature);
@@ -90,12 +95,14 @@ public class Sender {
         // Cifrar com a caixa
         mimeObject.ciphered = encrypt;
         if (encrypt) {
+            System.out.println("Ciphering...");
             data = cipherWithBox(data);
         }
 
         mimeObject.rawdata = data;
 
         if (timestamp) {
+            System.out.println("Timestamping");
             mimeObject.timestampSign = getSecureTimeStamp(data);
         }
 
@@ -104,6 +111,11 @@ public class Sender {
         oos.writeObject(mimeObject);
         oos.flush();
         oos.close();
+        System.out.println("Done");
+        // Clean temp fiz
+        if (arquivoZip != null) {
+            arquivoZip.delete();
+        }
     }
 
     private static void zipfiles(File[] arquivos, String outputZip) throws Exception {
@@ -116,7 +128,9 @@ public class Sender {
 
     private static byte[] cipherWithBox(byte[] data) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, loadKey());
+        byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+        cipher.init(Cipher.ENCRYPT_MODE, loadKey(), ivspec);
         return cipher.doFinal(data);
     }
 
@@ -154,13 +168,13 @@ public class Sender {
     }
 
 
-    private static Key loadKey() throws FileNotFoundException,
+    public static SecretKeySpec loadKey() throws FileNotFoundException,
             IOException,
             ClassNotFoundException {
-        ObjectInputStream in = new ObjectInputStream(new FileInputStream("key"));
-        SecretKey key = (SecretKey) in.readObject();
-        in.close();
-        return key;
+        File file = new File("key");
+        byte[] keyBytes = readFileToByteArray(file);
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+        return keySpec;
     }
 
 
@@ -179,8 +193,8 @@ public class Sender {
             kgen = KeyGenerator.getInstance("AES");
             kgen.init(128);
             SecretKey key = kgen.generateKey();
-            ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("key"));
-            os.writeObject(key);
+            FileOutputStream os = new FileOutputStream("key");
+            os.write(key.getEncoded());
             os.flush();
             os.close();
             return key;
