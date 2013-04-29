@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.X509Certificate;
 
@@ -14,6 +15,8 @@ import aiss.AissMime;
 import aiss.sender.Sender;
 import aiss.shared.CCConnection;
 import aiss.shared.KeyType;
+
+
 
 public class Receiver {
 
@@ -28,7 +31,7 @@ public class Receiver {
     private static final int EMAIL = 0;
     private static final int ZIP = 1;
 
-
+    private static X509Certificate[] caCertificateList = new X509Certificate[2];
 
     private CCConnection provider;
 
@@ -133,6 +136,9 @@ public class Receiver {
             byte[] clearText,
                 byte[] signature,
                 X509Certificate certificate) throws Exception {
+        if (!CCCertificateValidation(certificate)) {
+            return false;
+        }
         Signature signatureEngine = Signature.getInstance(SIGN_ALGORITHM);
         signatureEngine.initVerify(certificate.getPublicKey());
         signatureEngine.update(clearText);
@@ -167,8 +173,6 @@ public class Receiver {
         result[1] = end;
 
         return result;
-
-
     }
 
 
@@ -179,4 +183,23 @@ public class Receiver {
         fos.close();
     }
 
+    private static Boolean CCCertificateValidation(X509Certificate cert) throws Exception {
+        PublicKey key;
+        switch (KEY_TYPE) {
+        case Assinatura:
+            key = caCertificateList[1].getPublicKey();
+            break;
+        case Autenticacao:
+            key = caCertificateList[0].getPublicKey();
+            break;
+        default:
+            throw new Exception("Invalid Key type");
+        }
+        try {
+            cert.verify(key);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
 }

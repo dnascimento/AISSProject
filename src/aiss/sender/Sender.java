@@ -136,8 +136,9 @@ public class Sender {
 
 
     private static byte[] getSecureTimeStamp(byte[] hash) {
-        // TODO
-        // http: // www.itconsult.co.uk/stamper/stampinf.htm
+        // TODO Abrir um socket para o servidor que criaste em timeStampServer,
+        // Enviar o hash
+        // Ler o return e devolver o return
         return null;
     }
 
