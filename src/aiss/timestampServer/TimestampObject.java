@@ -1,12 +1,12 @@
-package timestampServer;
+package aiss.timestampServer;
 
 import java.io.Serializable;
 
 public class TimestampObject
         implements Serializable {
     private static final long serialVersionUID = -4009171162105117498L;
-    byte[] dataHash;
-    long timestamp;
+    public byte[] dataHash;
+    public long timestamp;
     byte[] signature;
 
     public TimestampObject(byte[] dataHash, long timestamp) {
@@ -17,6 +17,12 @@ public class TimestampObject
 
     public void setSignature(byte[] sign) {
         signature = sign;
+    }
+
+    public byte[] extractSignature() {
+        byte[] sign = signature;
+        signature = null;
+        return sign;
     }
 
 }

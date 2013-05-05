@@ -1,3 +1,5 @@
+package aiss;
+
 public class AesBox {
     public native char init(int mode);
 

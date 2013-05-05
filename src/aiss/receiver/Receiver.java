@@ -5,30 +5,28 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.math.BigInteger;
+import java.security.Key;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
-import aiss.AISSUtils;
 import aiss.AissMime;
-import aiss.sender.Sender;
+import aiss.shared.AISSUtils;
 import aiss.shared.CCConnection;
-import aiss.shared.KeyType;
+import aiss.shared.ConfC;
+import aiss.timestampServer.TimestampObject;
 
 
 
 public class Receiver {
-    private static final KeyType KEY_TYPE = KeyType.Autenticacao;
-    private static final String ASSINATURA = "assinatura";
-    private static final String AUTENTICACAO = "autenticacao";
-    private static final String SIGN_ALGORITHM = "SHA1withRSA";
-    private static final String KEY_STORE_INST = "JKS";
     private static final int DATA = 0;
     private static final int SIGNATURE = 1;
     private static final int EMAIL = 0;
@@ -42,6 +40,8 @@ public class Receiver {
     private static List<X509Certificate> caCertificateList = new ArrayList<X509Certificate>();
     private static BigInteger SIGN_CERT_SN = new BigInteger("7196419480743688086");
     private static BigInteger AUTH_CERT_SN = new BigInteger("7176353201892883087");
+    private static Key sharedSecretKey;
+    private static X509Certificate tsServerCert;
 
     private CCConnection provider;
 
@@ -71,11 +71,10 @@ public class Receiver {
 
 
         // Checktimestamp sign
-        if (mimeObj.timestampSign != null) {
-            boolean result = checkTimeStampSignature(mimeObj.rawdata,
-                                                     mimeObj.timestampSign);
-            System.out.println("Timestamp Sign: " + result);
-            // TODO mostrar o resultado
+        if (mimeObj.timestamp != null) {
+            Date timestampDate = checkTimeStampSignature(mimeObj.rawdata,
+                                                         mimeObj.timestamp);
+            System.out.println("Timestamp Sign: " + timestampDate);
         }
 
 
@@ -149,7 +148,7 @@ public class Receiver {
         if (!CCCertificateValidation(certificate)) {
             return false;
         }
-        Signature signatureEngine = Signature.getInstance(SIGN_ALGORITHM);
+        Signature signatureEngine = Signature.getInstance(ConfC.SIGN_ALGO);
         signatureEngine.initVerify(certificate.getPublicKey());
         signatureEngine.update(clearText);
         boolean result = signatureEngine.verify(signature);
@@ -161,16 +160,49 @@ public class Receiver {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         IvParameterSpec ivspec = new IvParameterSpec(iv);
-        cipher.init(Cipher.DECRYPT_MODE, Sender.loadKey(), ivspec);
+        cipher.init(Cipher.DECRYPT_MODE, loadKey(), ivspec);
         return cipher.doFinal(data);
     }
 
-    public static Boolean checkTimeStampSignature(byte[] data, byte[] signature) {
-        // TODO
-        return true;
+    /*
+     * Devolve a data em que foi assinado. Se nao for valido, devolve null
+     */
+    public static Date checkTimeStampSignature(byte[] dataHash, TimestampObject signObj) throws Exception {
+        // Load da keystore do certificado
+        if (tsServerCert == null) {
+            X509Certificate cert = AISSUtils.loadTimestampCertificate(ConfC.PROGRAM_STORE_LOCATION);
+            tsServerCert = cert;
+        }
+        // Extrair a assinatura
+        byte[] signature = signObj.extractSignature();
+
+        // Verificar se o hash e o mesmo
+        if (!Arrays.equals(dataHash, signObj.dataHash)) {
+            throw new Exception("Invalid Signature: Original data changed");
+        }
+
+        // Fazer a verificacao de assinatura
+        Signature sig = Signature.getInstance(ConfC.SIGN_ALGO);
+        sig.initVerify(tsServerCert);
+        byte[] struct = AISSUtils.ObjectToByteArray(signObj);
+        sig.update(struct);
+
+        boolean isSigned = sig.verify(signature);
+        if (!isSigned) {
+            throw new Exception("Invalid Signature: Signature is not valid");
+        }
+        Date stamp = new Date(signObj.timestamp);
+        return stamp;
     }
 
-
+    private static Key loadKey() throws Exception {
+        if (sharedSecretKey != null) {
+            return sharedSecretKey;
+        }
+        // Open Keystore and get the key
+        sharedSecretKey = AISSUtils.loadSharedSecretKey(ConfC.PROGRAM_STORE_LOCATION);
+        return sharedSecretKey;
+    }
 
 
 

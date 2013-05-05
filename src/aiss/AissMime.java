@@ -3,6 +3,8 @@ package aiss;
 import java.io.Serializable;
 import java.security.cert.X509Certificate;
 
+import aiss.timestampServer.TimestampObject;
+
 /**
  * DTO for security data
  */
@@ -27,7 +29,7 @@ public class AissMime
 
 
     // Timestamp Sign
-    public byte[] timestampSign = null;
+    public TimestampObject timestamp = null;
 
 
     // Certificate

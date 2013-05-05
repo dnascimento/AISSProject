@@ -1,4 +1,4 @@
-package timestampServer;
+package aiss.timestampServer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -12,7 +12,8 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
 
-import aiss.AISSUtils;
+import aiss.shared.AISSUtils;
+import aiss.shared.ConfC;
 
 public class TimestampHandler extends
         Thread {
@@ -29,8 +30,6 @@ public class TimestampHandler extends
 
     /**
      * Read the hash and sign it
-     * 
-     * @throws Exception
      */
     public void starter() throws Exception {
         byte[] data = new byte[1024];
@@ -65,7 +64,7 @@ public class TimestampHandler extends
     private byte[] signHash(byte[] hash, PrivateKey prvKey) throws NoSuchAlgorithmException,
             InvalidKeyException,
             SignatureException {
-        Signature sig = Signature.getInstance("SHA1withRSA");
+        Signature sig = Signature.getInstance(ConfC.SIGN_ALGO);
         sig.initSign(prvKey);
         sig.update(hash);
         byte[] signature = sig.sign();
