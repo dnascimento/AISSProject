@@ -1,19 +1,22 @@
 package timestampServer;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class TimestampObject
         implements Serializable {
+    private static final long serialVersionUID = -4009171162105117498L;
     byte[] dataHash;
-    Date signatureDate;
+    long timestamp;
     byte[] signature;
 
-    public TimestampObject(byte[] dataHash, Date signatureDate, byte[] signature) {
+    public TimestampObject(byte[] dataHash, long timestamp) {
         super();
         this.dataHash = dataHash;
-        this.signatureDate = signatureDate;
-        this.signature = signature;
+        this.timestamp = timestamp;
+    }
+
+    public void setSignature(byte[] sign) {
+        signature = sign;
     }
 
 }

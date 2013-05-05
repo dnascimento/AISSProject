@@ -1,26 +1,24 @@
 package aiss.sender;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
+import java.net.Socket;
 import java.security.cert.X509Certificate;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import aiss.AISSUtils;
 import aiss.AissMime;
 import aiss.shared.AppZip;
 import aiss.shared.CCConnection;
 import aiss.shared.KeyType;
+
 
 /**
  * Ler o certificado do cart‹o de cidad‹o Compressao da mensagem Cifrar com a box Associar
@@ -32,6 +30,7 @@ public class Sender {
     private static final int BUFFER_SIZE = 1024;
     // Define the CC certificate
     static KeyType KEY_TYPE = KeyType.Autenticacao;
+    public static int PORT = 15678;
 
     /**
      * Main method
@@ -46,7 +45,10 @@ public class Sender {
         boolean timestamp;
         String emailTextFilename;
         String outputFile;
-        generateSecretKey();
+        AISSUtils.generateSecretKey("keys/secretSharedKey");
+        byte[] dataBytes = new byte[1024];
+        byte[] coisa = getSecureTimeStamp(dataBytes);
+        System.out.println(coisa);
         try {
             sign = Boolean.parseBoolean(args[0]);
             encrypt = Boolean.parseBoolean(args[1]);
@@ -74,15 +76,15 @@ public class Sender {
 
         // Read email file and attach to DTO
         File emailTextFile = new File(emailTextFilename);
-        byte[] data = readFileToByteArray(emailTextFile);
+        byte[] data = AISSUtils.readFileToByteArray(emailTextFile);
         mimeObject.emailTextLenght = data.length;
 
         // Read ZIP File and attach to mimo
         if (arquivoZip != null) {
             System.out.println("Create archive");
-            byte[] zip = readFileToByteArray(arquivoZip);
+            byte[] zip = AISSUtils.readFileToByteArray(arquivoZip);
             mimeObject.zipLenght = zip.length;
-            data = concatByteArray(data, zip);
+            data = AISSUtils.concatByteArray(data, zip);
         }
 
 
@@ -91,7 +93,7 @@ public class Sender {
             System.out.println("Sign");
             byte[] signature = signDataUsingCC(data);
             mimeObject.dataSignLengh = signature.length;
-            data = concatByteArray(data, signature);
+            data = AISSUtils.concatByteArray(data, signature);
             mimeObject.certificate = getCCCertificate();
         }
 
@@ -104,11 +106,11 @@ public class Sender {
 
         mimeObject.rawdata = data;
 
+
         if (timestamp) {
             System.out.println("Timestamping");
             mimeObject.timestampSign = getSecureTimeStamp(data);
         }
-
         // Serializar e guardar no ficheiro de saida
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outputFile));
         oos.writeObject(mimeObject);
@@ -121,8 +123,8 @@ public class Sender {
         }
     }
 
-    private static void zipfiles(File[] arquivos, String outputZip) throws Exception {
-        AppZip zipzip = new AppZip(arquivos, outputZip);
+    private static AppZip zipfiles(File[] arquivos, String outputZip) throws Exception {
+        return new AppZip(arquivos, outputZip);
     }
 
     private static byte[] signDataUsingCC(byte[] data) throws Exception {
@@ -138,16 +140,20 @@ public class Sender {
     }
 
 
-    private static byte[] getSecureTimeStamp(byte[] hash) {
+    private static byte[] getSecureTimeStamp(byte[] hash) throws IOException {
         // TODO Abrir um socket para o servidor que criaste em timeStampServer,
         // Enviar o hash
         // Ler o return e devolver o return
-        return null;
+        Socket socket = new Socket("localhost", PORT);
+        InputStream stream = socket.getInputStream();
+        byte[] timestamp = new byte[1024];
+        stream.read(timestamp);
+        socket.close();
+        return timestamp;
     }
 
     public static X509Certificate getCCCertificate() throws Exception {
         X509Certificate certificates[] = CCConnection.getCertificate();
-
         switch (KEY_TYPE) {
         case Assinatura:
             return certificates[1];
@@ -170,52 +176,19 @@ public class Sender {
         }
     }
 
-    private static byte[] readFileToByteArray(File emailTextFile) throws IOException {
-        FileInputStream in = new FileInputStream(emailTextFile);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buf = new byte[BUFFER_SIZE];
-        int bytesRead = in.read(buf);
-        while (bytesRead != -1) {
-            baos.write(buf, 0, bytesRead);
-            bytesRead = in.read(buf);
-        }
-        baos.flush();
-        return baos.toByteArray();
-    }
 
 
     public static SecretKeySpec loadKey() throws FileNotFoundException,
             IOException,
             ClassNotFoundException {
         File file = new File("key");
-        byte[] keyBytes = readFileToByteArray(file);
+        byte[] keyBytes = AISSUtils.readFileToByteArray(file);
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
         return keySpec;
     }
 
 
-    public static byte[] concatByteArray(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length];
-        System.arraycopy(a, 0, result, 0, a.length);
-        System.arraycopy(b, 0, result, a.length, b.length);
-        return result;
-    }
 
 
-    private static Key generateSecretKey() throws FileNotFoundException, IOException {
-        KeyGenerator kgen;
-        try {
-            kgen = KeyGenerator.getInstance("AES");
-            kgen.init(256);
-            SecretKey key = kgen.generateKey();
-            FileOutputStream os = new FileOutputStream("key");
-            os.write(key.getEncoded());
-            os.flush();
-            os.close();
-            return key;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+
 }

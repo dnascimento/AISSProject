@@ -1,11 +1,8 @@
 package aiss.receiver;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.math.BigInteger;
 import java.security.PublicKey;
@@ -18,6 +15,7 @@ import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
+import aiss.AISSUtils;
 import aiss.AissMime;
 import aiss.sender.Sender;
 import aiss.shared.CCConnection;
@@ -36,7 +34,6 @@ public class Receiver {
     private static final int EMAIL = 0;
     private static final int ZIP = 1;
     private static final String CERTIFICATE_DIR = "CACertificates";
-    private static final int BUFFER_SIZE = 1024;
     private static final boolean[] AUTH_CERT_KEY_USAGE = { true, false, false, false,
             true, false, false, false, false };
     private static final boolean[] SIGN_CERT_KEY_USAGE = { false, true, false, false,
@@ -98,7 +95,7 @@ public class Receiver {
             System.out.println("Checktimestamp");
             int signatureBegin = mimeObj.rawdata.length - mimeObj.dataSignLengh;
 
-            byte[][] result = sliptByteArray(mimeObj.rawdata, signatureBegin);
+            byte[][] result = AISSUtils.sliptByteArray(mimeObj.rawdata, signatureBegin);
 
             if (mimeObj.certificate == null) {
                 throw new Exception("Mail without certificate");
@@ -122,17 +119,17 @@ public class Receiver {
 
         // Split do zip e do texto de email
         File file;
-        byte[][] emailAndZip = sliptByteArray(data, mimeObj.emailTextLenght);
+        byte[][] emailAndZip = AISSUtils.sliptByteArray(data, mimeObj.emailTextLenght);
         if (emailAndZip[EMAIL].length != 0) {
             System.out.println("Get mail");
             file = new File(outDirectory, "email.txt");
-            byteArrayToFile(emailAndZip[EMAIL], file);
+            AISSUtils.byteArrayToFile(emailAndZip[EMAIL], file);
 
         }
         if (emailAndZip[ZIP].length != 0) {
             System.out.println("Get zip");
             file = new File(outDirectory, "data.zip");
-            byteArrayToFile(emailAndZip[ZIP], file);
+            AISSUtils.byteArrayToFile(emailAndZip[ZIP], file);
         }
 
 
@@ -174,33 +171,15 @@ public class Receiver {
     }
 
 
-    public static byte[][] sliptByteArray(byte[] data, int pos) {
-        byte[] begin = new byte[pos];
-        byte[] end = new byte[data.length - pos];
-
-        System.arraycopy(data, 0, begin, 0, pos);
-        System.arraycopy(data, pos, end, 0, end.length);
-
-        byte[][] result = new byte[2][];
-        result[0] = begin;
-        result[1] = end;
-
-        return result;
-    }
 
 
-    public static void byteArrayToFile(byte[] data, File destination) throws Exception {
-        FileOutputStream fos = new FileOutputStream(destination);
-        fos.write(data);
-        fos.flush();
-        fos.close();
-    }
+
 
     private static void loadCaCertificateList() throws Exception {
         File dir = new File(CERTIFICATE_DIR);
         File[] certFiles = dir.listFiles();
         for (int i = 0; i < certFiles.length; i++) {
-            byte[] certByteArray = readFileToByteArray(certFiles[i]);
+            byte[] certByteArray = AISSUtils.readFileToByteArray(certFiles[i]);
             ByteArrayInputStream in = new ByteArrayInputStream(certByteArray);
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
@@ -249,16 +228,5 @@ public class Receiver {
         throw new Exception("Certificate doesnt exists");
     }
 
-    private static byte[] readFileToByteArray(File emailTextFile) throws IOException {
-        FileInputStream in = new FileInputStream(emailTextFile);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buf = new byte[BUFFER_SIZE];
-        int bytesRead = in.read(buf);
-        while (bytesRead != -1) {
-            baos.write(buf, 0, bytesRead);
-            bytesRead = in.read(buf);
-        }
-        baos.flush();
-        return baos.toByteArray();
-    }
+
 }
