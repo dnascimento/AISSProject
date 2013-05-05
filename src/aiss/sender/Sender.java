@@ -57,7 +57,7 @@ public class Sender {
             throw new Exception("Wrong parameters");
         }
 
-        // //////////////////// ZIP ////////////////////////////////
+        // //////////////////// ZIP FILES IF EXISTS ////////////////////////////////
         File arquivoZip = null;
         if (args.length > 5) {
             File filesToZip[] = new File[args.length - 5];
@@ -69,12 +69,15 @@ public class Sender {
         }
         // //////////////////// END-ZIP ////////////////////////////////
 
+        // Data transport object
         AissMime mimeObject = new AissMime();
 
+        // Read email file and attach to DTO
         File emailTextFile = new File(emailTextFilename);
         byte[] data = readFileToByteArray(emailTextFile);
         mimeObject.emailTextLenght = data.length;
 
+        // Read ZIP File and attach to mimo
         if (arquivoZip != null) {
             System.out.println("Create archive");
             byte[] zip = readFileToByteArray(arquivoZip);
@@ -144,6 +147,7 @@ public class Sender {
 
     public static X509Certificate getCCCertificate() throws Exception {
         X509Certificate certificates[] = CCConnection.getCertificate();
+
         switch (KEY_TYPE) {
         case Assinatura:
             return certificates[1];
@@ -152,6 +156,17 @@ public class Sender {
             return certificates[0];
         default:
             throw new Exception("Invalid Key type");
+        }
+    }
+
+    public static void saveCCCertificatesToDisk() throws Exception {
+        X509Certificate certificates[] = CCConnection.getCertificate();
+        for (int i = 0; i < certificates.length; i++) {
+            File file = new File("Certificate_" + i + ".cer");
+            FileOutputStream out = new FileOutputStream(file);
+            out.write(certificates[i].getEncoded());
+            out.flush();
+            out.close();
         }
     }
 
@@ -187,12 +202,11 @@ public class Sender {
     }
 
 
-    @SuppressWarnings("unused")
     private static Key generateSecretKey() throws FileNotFoundException, IOException {
         KeyGenerator kgen;
         try {
             kgen = KeyGenerator.getInstance("AES");
-            kgen.init(128);
+            kgen.init(256);
             SecretKey key = kgen.generateKey();
             FileOutputStream os = new FileOutputStream("key");
             os.write(key.getEncoded());

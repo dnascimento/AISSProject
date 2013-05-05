@@ -1,12 +1,19 @@
 package aiss.receiver;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -19,8 +26,6 @@ import aiss.shared.KeyType;
 
 
 public class Receiver {
-
-
     private static final KeyType KEY_TYPE = KeyType.Autenticacao;
     private static final String ASSINATURA = "assinatura";
     private static final String AUTENTICACAO = "autenticacao";
@@ -30,8 +35,16 @@ public class Receiver {
     private static final int SIGNATURE = 1;
     private static final int EMAIL = 0;
     private static final int ZIP = 1;
+    private static final String CERTIFICATE_DIR = "CACertificates";
+    private static final int BUFFER_SIZE = 1024;
+    private static final boolean[] AUTH_CERT_KEY_USAGE = { true, false, false, false,
+            true, false, false, false, false };
+    private static final boolean[] SIGN_CERT_KEY_USAGE = { false, true, false, false,
+            false, false, false, false, false };
 
-    private static X509Certificate[] caCertificateList = new X509Certificate[2];
+    private static List<X509Certificate> caCertificateList = new ArrayList<X509Certificate>();
+    private static BigInteger SIGN_CERT_SN = new BigInteger("7196419480743688086");
+    private static BigInteger AUTH_CERT_SN = new BigInteger("7176353201892883087");
 
     private CCConnection provider;
 
@@ -43,7 +56,7 @@ public class Receiver {
      */
     public static void main(String[] args) throws Exception {
         String inputMailObject;
-        // Directorio onde vai guardar o email.txt, o directorio zip de anexos e o txt com
+        // Directorio onde vai guardar o email.txt, o directorio zip de anexos e o txt
         // o resultado das validacoes
         String outDirectoryPath;
         try {
@@ -183,23 +196,69 @@ public class Receiver {
         fos.close();
     }
 
+    private static void loadCaCertificateList() throws Exception {
+        File dir = new File(CERTIFICATE_DIR);
+        File[] certFiles = dir.listFiles();
+        for (int i = 0; i < certFiles.length; i++) {
+            byte[] certByteArray = readFileToByteArray(certFiles[i]);
+            ByteArrayInputStream in = new ByteArrayInputStream(certByteArray);
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
+            caCertificateList.add(cert);
+
+            if (cert.getSerialNumber() == new BigInteger("7176353201892883087")) {
+                // Auth Key
+            }
+            if (cert.getSerialNumber() == new BigInteger("7196419480743688086")) {
+                // Sign Key
+            }
+        }
+    }
+
     private static Boolean CCCertificateValidation(X509Certificate cert) throws Exception {
         PublicKey key;
-        switch (KEY_TYPE) {
-        case Assinatura:
-            key = caCertificateList[1].getPublicKey();
-            break;
-        case Autenticacao:
-            key = caCertificateList[0].getPublicKey();
-            break;
-        default:
+        if (caCertificateList.isEmpty()) {
+            loadCaCertificateList();
+        }
+        X509Certificate caCert = null;
+        if (cert.getKeyUsage().equals(AUTH_CERT_KEY_USAGE)) {
+            caCert = getCACertificate(AUTH_CERT_SN);
+        }
+        if (cert.getKeyUsage().equals(SIGN_CERT_KEY_USAGE)) {
+            caCert = getCACertificate(SIGN_CERT_SN);
+        }
+        if (caCert == null) {
             throw new Exception("Invalid Key type");
         }
         try {
+            key = caCert.getPublicKey();
             cert.verify(key);
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+
+    private static X509Certificate getCACertificate(BigInteger serialNumber) throws Exception {
+        for (X509Certificate cert : caCertificateList) {
+            if (cert.getSerialNumber().equals(serialNumber)) {
+                return cert;
+            }
+        }
+        throw new Exception("Certificate doesnt exists");
+    }
+
+    private static byte[] readFileToByteArray(File emailTextFile) throws IOException {
+        FileInputStream in = new FileInputStream(emailTextFile);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[BUFFER_SIZE];
+        int bytesRead = in.read(buf);
+        while (bytesRead != -1) {
+            baos.write(buf, 0, bytesRead);
+            bytesRead = in.read(buf);
+        }
+        baos.flush();
+        return baos.toByteArray();
     }
 }
