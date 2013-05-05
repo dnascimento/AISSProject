@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
@@ -17,10 +19,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import timestampServer.TimestampClient;
+
 import aiss.AissMime;
 import aiss.shared.AppZip;
 import aiss.shared.CCConnection;
 import aiss.shared.KeyType;
+
 
 /**
  * Ler o certificado do cart‹o de cidad‹o Compressao da mensagem Cifrar com a box Associar
@@ -32,6 +37,7 @@ public class Sender {
     private static final int BUFFER_SIZE = 1024;
     // Define the CC certificate
     static KeyType KEY_TYPE = KeyType.Autenticacao;
+    public static int PORT = 15678;
 
     /**
      * Main method
@@ -47,6 +53,9 @@ public class Sender {
         String emailTextFilename;
         String outputFile;
         generateSecretKey();
+        byte[] dataBytes = new byte[1024];
+        byte[] coisa = getSecureTimeStamp(dataBytes);
+        System.out.println(coisa);
         try {
             sign = Boolean.parseBoolean(args[0]);
             encrypt = Boolean.parseBoolean(args[1]);
@@ -101,6 +110,7 @@ public class Sender {
 
         mimeObject.rawdata = data;
 
+
         if (timestamp) {
             System.out.println("Timestamping");
             mimeObject.timestampSign = getSecureTimeStamp(data);
@@ -134,12 +144,17 @@ public class Sender {
         return cipher.doFinal(data);
     }
 
-
-    private static byte[] getSecureTimeStamp(byte[] hash) {
+    
+    private static byte[] getSecureTimeStamp(byte[] hash) throws IOException {
         // TODO Abrir um socket para o servidor que criaste em timeStampServer,
-        // Enviar o hash
-        // Ler o return e devolver o return
-        return null;
+        // Enviar o hash 
+        // Ler o return e devolver o return 
+    	Socket socket = new Socket("localhost", PORT);
+    	InputStream stream = socket.getInputStream();
+    	byte[] timestamp = new byte[1024];
+    	stream.read(timestamp);
+    	socket.close();
+    	return timestamp;
     }
 
     public static X509Certificate getCCCertificate() throws Exception {
@@ -172,7 +187,7 @@ public class Sender {
     public static SecretKeySpec loadKey() throws FileNotFoundException,
             IOException,
             ClassNotFoundException {
-        File file = new File("key");
+        File file = new File("key"); 
         byte[] keyBytes = readFileToByteArray(file);
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
         return keySpec;

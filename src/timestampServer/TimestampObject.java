@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class TimestampObject
         implements Serializable {
+	private static final long serialVersionUID = -4009171162105117498L;
     byte[] dataHash;
     Date signatureDate;
     byte[] signature;

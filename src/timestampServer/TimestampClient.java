@@ -4,27 +4,35 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 
 public class TimestampClient extends
         Thread {
 
-    X509Certificate certificate;
+	PrivateKey privkey;
     // ler o certificado
     private Socket socket;
 
-    public TimestampClient(Socket socket, X509Certificate certificate) {
+    public TimestampClient(Socket socket, PrivateKey privkey) {
         this.socket = socket;
-        this.certificate = certificate;
+        this.privkey = privkey;
     }
-
-    @Override
-    public void start() {
+    
+    public void starter() 
+               throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         byte[] data = new byte[1024];
         ByteArrayOutputStream outputArray = new ByteArrayOutputStream();
         OutputStream out = socket.getOutputStream();
         out.flush();
+        ObjectOutputStream oos = new ObjectOutputStream(outputArray);
         InputStream in = socket.getInputStream();
         int bytesReaded;
         bytesReaded = in.read(data);
@@ -35,21 +43,23 @@ public class TimestampClient extends
         byte[] hash = new byte[bytesReaded];
         System.arraycopy(data, 0, hash, 0, bytesReaded);
 
-        byte[] sign = signHash(hash);
+        byte[] sign = signHash(hash, privkey);
 
-        TimestampObject timestampSignatureObject = new TimestampObject(data, new Date(),
-                sign);
+        TimestampObject timestampSignatureObject = new TimestampObject(data, new Date(), sign);
 
-
-        // TODO invés de return de um sign, devolver o object
-        out.write(timestampSignatureObject);
-        out.flush();
-
+       
+        oos.writeObject(timestampSignatureObject);
+        out.write(outputArray.toByteArray());
+        oos.close();
     }
 
-    private byte[] signHash(byte[] hash) {
-        // TODO Verificar se tem um comprimento válido (128bits salvo erro)
-        // Assinar utilizando o certificate
-        return null;
+    private byte[] signHash(byte[] hash, PrivateKey prvKey) 
+               throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    	Signature sig = Signature.getInstance("SHA1withRSA");
+        sig.initSign(prvKey);
+        sig.update(hash);
+        byte[] signature = sig.sign();
+        return signature;
     }
+    
 }
