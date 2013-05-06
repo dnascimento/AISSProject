@@ -1,9 +1,9 @@
 package aiss.receiver;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.FileReader;
 import java.security.Key;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -21,6 +21,8 @@ import aiss.AissMime;
 import aiss.shared.AISSUtils;
 import aiss.shared.ConfC;
 import aiss.timestampServer.TimestampObject;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 
 
@@ -57,13 +59,19 @@ public class Receiver {
 
         // Ler o objecto
         File inputMailFile = new File(inputMailObject);
-        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputMailFile));
-        // TODO ler ficheiro texto
-        AissMime mimeObj = (AissMime) ois.readObject();
-        ois.close();
-        // TODO Usar base64 para descodificar
-        // Base64.encode(arg0)
+        BufferedReader in = new BufferedReader(new FileReader(inputMailFile));
+        StringBuilder sb = new StringBuilder();
+        String line = in.readLine();
 
+        while (line != null) {
+            sb.append(line);
+            sb.append("\n");
+            line = in.readLine();
+        }
+        String contentread = sb.toString();
+        in.close();
+        byte[] content = Base64.decode(contentread);
+        AissMime mimeObj = (AissMime) AISSUtils.ByteArrayToObject(content);
 
 
         // Decifrar os dados
