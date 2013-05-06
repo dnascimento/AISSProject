@@ -1,10 +1,16 @@
 #include <jni.h>
 #include <stdio.h>
-
+#include <stdlib.h>
+#include "protocol.h"
 
 //char init(u32 mode);
 JNIEXPORT jchar JNICALL Java_AesBox_init (JNIEnv * env, jobject obj, jint mode){
 	printf("dario\n");
+	u32 modo = (u32) mode;
+	printf(modo);
+	char str[10];
+	char result = itoa(modo,str,10);
+
 }
 
 /*

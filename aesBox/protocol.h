@@ -104,7 +104,7 @@ char  update(u8 * data_in, u32 size, u8 * data_out,u32 * size_out);
 
 	@return Returning code from the last acknowledge + reply packet
 */
-char overloaded  doFinal(u8 * data_out,u32 *size_out);
+char doFinal(u8 * data_out,u32 *size_out);
 
 
 /** @brief Dofinal function with a last chunk of input data
@@ -121,7 +121,7 @@ char overloaded  doFinal(u8 * data_out,u32 *size_out);
 
 	@return Returning code from the last acknowledge + reply packet
 */
-char overloaded  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out);
+char  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out);
 
 
 /** @brief Get Data from a formatted packet
