@@ -1,4 +1,4 @@
-package aiss.shared;
+package aiss.sender;
 
 import java.io.File;
 import java.io.FileInputStream;

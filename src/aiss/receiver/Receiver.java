@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
-import java.math.BigInteger;
 import java.security.Key;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -20,17 +19,12 @@ import javax.crypto.spec.IvParameterSpec;
 
 import aiss.AissMime;
 import aiss.shared.AISSUtils;
-import aiss.shared.CCConnection;
 import aiss.shared.ConfC;
 import aiss.timestampServer.TimestampObject;
 
 
 
 public class Receiver {
-    private static final int DATA = 0;
-    private static final int SIGNATURE = 1;
-    private static final int EMAIL = 0;
-    private static final int ZIP = 1;
     private static final String CERTIFICATE_DIR = "CACertificates";
     private static final boolean[] AUTH_CERT_KEY_USAGE = { true, false, false, false,
             true, false, false, false, false };
@@ -38,12 +32,10 @@ public class Receiver {
             false, false, false, false, false };
 
     private static List<X509Certificate> caCertificateList = new ArrayList<X509Certificate>();
-    private static BigInteger SIGN_CERT_SN = new BigInteger("7196419480743688086");
-    private static BigInteger AUTH_CERT_SN = new BigInteger("7176353201892883087");
+    private static String AUTH_CERT_SN = "7196419480743688086";
+    private static String SIGN_CERT_SN = "7176353201892883087";
     private static Key sharedSecretKey;
     private static X509Certificate tsServerCert;
-
-    private CCConnection provider;
 
     /**
      * 1¼ Validar a assinatura temporal 2¼ Decifrar com a caixa 3¼ Validar a assinatura
@@ -52,93 +44,74 @@ public class Receiver {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        args = new String[] { "thunderbox/transferBox/email.out", "thunderbox/outbox/" };
+
         String inputMailObject;
-        // Directorio onde vai guardar o email.txt, o directorio zip de anexos e o txt
-        // o resultado das validacoes
-        String outDirectoryPath;
+        String outMainDirectoryPath;
         try {
             inputMailObject = args[0];
-            outDirectoryPath = args[1];
+            outMainDirectoryPath = args[1];
         } catch (Exception e) {
             throw new Exception("Wrong parameters");
         }
 
         // Ler o objecto
-        ObjectInputStream ois = new ObjectInputStream(
-                new FileInputStream(inputMailObject));
+        File inputMailFile = new File(inputMailObject);
+        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputMailFile));
         AissMime mimeObj = (AissMime) ois.readObject();
         ois.close();
 
 
         // Checktimestamp sign
         if (mimeObj.timestamp != null) {
-            Date timestampDate = checkTimeStampSignature(mimeObj.rawdata,
-                                                         mimeObj.timestamp);
+            Date timestampDate = checkTimeStampSignature(mimeObj.data, mimeObj.timestamp);
             System.out.println("Timestamp Sign: " + timestampDate);
         }
 
 
-
-        byte[] data;
         // Decifrar os dados
         if (mimeObj.ciphered) {
             System.out.println("Decipher");
-            data = decipherAES(mimeObj.rawdata);
-        } else {
-            data = mimeObj.rawdata;
+            mimeObj.data = decipherAES(mimeObj.data);
         }
 
 
         // Sacar a assinatura
-        if (mimeObj.dataSignLengh != 0) {
+        if (mimeObj.signature != null) {
             System.out.println("Checktimestamp");
-            int signatureBegin = mimeObj.rawdata.length - mimeObj.dataSignLengh;
-
-            byte[][] result = AISSUtils.sliptByteArray(mimeObj.rawdata, signatureBegin);
 
             if (mimeObj.certificate == null) {
                 throw new Exception("Mail without certificate");
             }
-            boolean isSigned = checkSignature(result[DATA],
-                                              result[SIGNATURE],
+            boolean isSigned = checkSignature(mimeObj.data,
+                                              mimeObj.signature,
                                               mimeObj.certificate);
             if (isSigned) {
                 System.out.println("Assinatura v‡lida");
             } else {
                 System.out.println("Assinatura inv‡lida");
+                return;
             }
-            data = result[DATA];
         }
 
-        File outDirectory = new File(outDirectoryPath);
-        if (outDirectory.exists()) {
-            throw new Exception("Output directory already exists");
-        }
-        outDirectory.mkdirs();
-
-        // Split do zip e do texto de email
-        File file;
-        byte[][] emailAndZip = AISSUtils.sliptByteArray(data, mimeObj.emailTextLenght);
-        if (emailAndZip[EMAIL].length != 0) {
-            System.out.println("Get mail");
-            file = new File(outDirectory, "email.txt");
-            AISSUtils.byteArrayToFile(emailAndZip[EMAIL], file);
-
-        }
-        if (emailAndZip[ZIP].length != 0) {
-            System.out.println("Get zip");
-            file = new File(outDirectory, "data.zip");
-            AISSUtils.byteArrayToFile(emailAndZip[ZIP], file);
+        File outMainDirectory = new File(outMainDirectoryPath);
+        if (!outMainDirectory.exists()) {
+            throw new Exception("Output directory doesnt exists");
         }
 
+        File outDirectory = generateNewDirectory(outMainDirectory);
+        UnZip unZip = new UnZip();
+        unZip.unZipIt(mimeObj.data, outDirectory);
+
+        // Unzip do conteudo para dentro da pasta
+
+        inputMailFile.delete();
 
         // TODO escrever o log de resultado
         /**
          * Create 2 files and 1 directory: - email.txt -> clean email text - attachments
          * -> attachments folder - status.txt -> timestampSigned? authorSigned?
          */
-
-
     }
 
     public static Boolean checkSignature(
@@ -148,7 +121,7 @@ public class Receiver {
         if (!CCCertificateValidation(certificate)) {
             return false;
         }
-        Signature signatureEngine = Signature.getInstance(ConfC.SIGN_ALGO);
+        Signature signatureEngine = Signature.getInstance(ConfC.SIGN_ALGO_CC);
         signatureEngine.initVerify(certificate.getPublicKey());
         signatureEngine.update(clearText);
         boolean result = signatureEngine.verify(signature);
@@ -157,7 +130,7 @@ public class Receiver {
 
 
     public static byte[] decipherAES(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
         byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         IvParameterSpec ivspec = new IvParameterSpec(iv);
         cipher.init(Cipher.DECRYPT_MODE, loadKey(), ivspec);
@@ -182,7 +155,7 @@ public class Receiver {
         }
 
         // Fazer a verificacao de assinatura
-        Signature sig = Signature.getInstance(ConfC.SIGN_ALGO);
+        Signature sig = Signature.getInstance(ConfC.SIGN_ALGO_TS);
         sig.initVerify(tsServerCert);
         byte[] struct = AISSUtils.ObjectToByteArray(signObj);
         sig.update(struct);
@@ -192,6 +165,7 @@ public class Receiver {
             throw new Exception("Invalid Signature: Signature is not valid");
         }
         Date stamp = new Date(signObj.timestamp);
+        System.out.println("Timestamp signature is valid");
         return stamp;
     }
 
@@ -217,11 +191,11 @@ public class Receiver {
             X509Certificate cert = (X509Certificate) certFactory.generateCertificate(in);
             caCertificateList.add(cert);
 
-            if (cert.getSerialNumber() == new BigInteger("7176353201892883087")) {
-                // Auth Key
+            if (cert.getSerialNumber().toString().equals(AUTH_CERT_SN)) {
+                System.out.println("Auth CA Key Loaded");
             }
-            if (cert.getSerialNumber() == new BigInteger("7196419480743688086")) {
-                // Sign Key
+            if (cert.getSerialNumber().toString().equals(SIGN_CERT_SN)) {
+                System.out.println("Sign CA Key Loaded");
             }
         }
     }
@@ -232,14 +206,15 @@ public class Receiver {
             loadCaCertificateList();
         }
         X509Certificate caCert = null;
-        if (cert.getKeyUsage().equals(AUTH_CERT_KEY_USAGE)) {
-            caCert = getCACertificate(AUTH_CERT_SN);
-        }
-        if (cert.getKeyUsage().equals(SIGN_CERT_KEY_USAGE)) {
-            caCert = getCACertificate(SIGN_CERT_SN);
-        }
+        // if (cert.getKeyUsage().equals(AUTH_CERT_KEY_USAGE)) {
+        caCert = getCACertificate(AUTH_CERT_SN);
+        // }
+        // if (cert.getKeyUsage().equals(SIGN_CERT_KEY_USAGE)) {
+        // caCert = getCACertificate(SIGN_CERT_SN);
+        // }
         if (caCert == null) {
-            throw new Exception("Invalid Key type");
+            throw new Exception(
+                    "Invalid Certificate type: Only accepts Authentication cert");
         }
         try {
             key = caCert.getPublicKey();
@@ -251,13 +226,33 @@ public class Receiver {
     }
 
 
-    private static X509Certificate getCACertificate(BigInteger serialNumber) throws Exception {
+    private static X509Certificate getCACertificate(String serialNumber) throws Exception {
         for (X509Certificate cert : caCertificateList) {
-            if (cert.getSerialNumber().equals(serialNumber)) {
+            if (cert.getSerialNumber().toString().equals(serialNumber)) {
                 return cert;
             }
         }
         throw new Exception("Certificate doesnt exists");
+    }
+
+    private static File generateNewDirectory(File parent) {
+        String[] childDirsName = parent.list();
+        int i = childDirsName.length;
+        while (true) {
+            boolean exits = false;
+            String newName = "out" + i;
+            for (String filename : childDirsName) {
+                if (newName.equals(filename)) {
+                    exits = true;
+                    break;
+                }
+            }
+            if (!exits) {
+                File out = new File(parent, newName);
+                out.mkdir();
+                return out;
+            }
+        }
     }
 
 

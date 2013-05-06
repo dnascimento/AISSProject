@@ -33,6 +33,7 @@ public class TimeStampServer {
     }
 
     public void start() throws Exception {
+        System.out.println("Server Started. Waiting for requests.....");
         ServerSocket serverSocket = new ServerSocket(ConfC.TS_SERVER_PORT);
         while (true) {
             Socket socket = serverSocket.accept();
@@ -44,11 +45,10 @@ public class TimeStampServer {
     private PrivateKey loadPrivateKey() throws Exception {
         // Tentar carregar a chave do keystore
         KeyStore keyStore = KeyStore.getInstance(ConfC.KEY_STORE_INST);
-        char[] password = "aiss".toCharArray();
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(ConfC.TS_STORE);
-            keyStore.load(fis, password);
+            keyStore.load(fis, ConfC.PASSWORD);
         } catch (FileNotFoundException exception) {
             keyStore = null;
         } finally {
@@ -60,7 +60,10 @@ public class TimeStampServer {
         if (keyStore == null) {
             throw new Exception("TIMESTAMP SERVER: KeyStore not available");
         }
-        Key k = keyStore.getKey(ConfC.TIMESTAMP_PRIVATE, password);
+        Key k = keyStore.getKey(ConfC.TIMESTAMP_PRIVATE, ConfC.PASSWORD);
+        if (k != null) {
+            System.out.println("Private key loaded");
+        }
         return (PrivateKey) k;
     }
 }

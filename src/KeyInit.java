@@ -172,7 +172,7 @@ public class KeyInit {
         X509CertImpl cert = new X509CertImpl(info);
 
         PrivateKey masterKey = generateRSAKeyPair().getPrivate();
-        cert.sign(masterKey, ConfC.SIGN_ALGO);
+        cert.sign(masterKey, ConfC.SIGN_ALGO_TS);
 
         // Update the algorith, and resign.
         algorithmID = (AlgorithmId) cert.get(X509CertImpl.SIG_ALG);
@@ -180,7 +180,7 @@ public class KeyInit {
                  algorithmID);
         cert = new X509CertImpl(info);
 
-        cert.sign(masterKey, ConfC.SIGN_ALGO);
+        cert.sign(masterKey, ConfC.SIGN_ALGO_TS);
         return cert;
     }
 

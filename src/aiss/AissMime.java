@@ -12,20 +12,13 @@ public class AissMime
         implements Serializable {
     private static final long serialVersionUID = -4009171162105117499L;
 
-    // EmailTextLenght
-    public int emailTextLenght = 0;
-
-    // Zip size
-    public int zipLenght = 0;
-
-    // Datasign lenght
-    public int dataSignLengh = 0;
-
     public boolean ciphered = false;
 
+    // Dataciphered
+    public byte[] data = null;
 
-    // Dataciphered: mail|zip|signature
-    public byte[] rawdata = null;
+    // Signature
+    public byte[] signature = null;
 
 
     // Timestamp Sign

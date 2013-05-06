@@ -15,6 +15,10 @@ public class TimestampObject
         this.timestamp = timestamp;
     }
 
+    public TimestampObject(byte[] hash) {
+        dataHash = hash;
+    }
+
     public void setSignature(byte[] sign) {
         signature = sign;
     }

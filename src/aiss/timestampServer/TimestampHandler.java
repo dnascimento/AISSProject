@@ -1,9 +1,7 @@
 package aiss.timestampServer;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -32,31 +30,22 @@ public class TimestampHandler extends
      * Read the hash and sign it
      */
     public void starter() throws Exception {
-        byte[] data = new byte[1024];
-        ByteArrayOutputStream outputArray = new ByteArrayOutputStream();
-        OutputStream out = socket.getOutputStream();
-        out.flush();
-        ObjectOutputStream oos = new ObjectOutputStream(outputArray);
-        InputStream in = socket.getInputStream();
-        int bytesReaded;
-        bytesReaded = in.read(data);
-        if (bytesReaded > 1024 || bytesReaded == 0) {
-            System.out.println("Error");
-            return;
-        }
-        byte[] emailHash = new byte[bytesReaded];
-        System.arraycopy(data, 0, emailHash, 0, bytesReaded);
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
+        TimestampObject ts = (TimestampObject) in.readObject();
+
+        byte[] emailHash = ts.dataHash;
         long timestamp = new Date().getTime();
-        TimestampObject timestampSignatureObject = new TimestampObject(data, timestamp);
+        TimestampObject timestampSignatureObject = new TimestampObject(emailHash,
+                timestamp);
 
         byte[] struct = AISSUtils.ObjectToByteArray(timestampSignatureObject);
         byte[] sign = signHash(struct, privkey);
         timestampSignatureObject.setSignature(sign);
 
-        oos.writeObject(timestampSignatureObject);
-        out.write(outputArray.toByteArray());
-        oos.close();
+        out.writeObject(timestampSignatureObject);
+        out.close();
     }
 
 
@@ -64,7 +53,7 @@ public class TimestampHandler extends
     private byte[] signHash(byte[] hash, PrivateKey prvKey) throws NoSuchAlgorithmException,
             InvalidKeyException,
             SignatureException {
-        Signature sig = Signature.getInstance(ConfC.SIGN_ALGO);
+        Signature sig = Signature.getInstance(ConfC.SIGN_ALGO_TS);
         sig.initSign(prvKey);
         sig.update(hash);
         byte[] signature = sig.sign();

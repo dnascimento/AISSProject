@@ -3,7 +3,6 @@ package aiss.sender;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -15,7 +14,6 @@ import javax.crypto.spec.IvParameterSpec;
 
 import aiss.AissMime;
 import aiss.shared.AISSUtils;
-import aiss.shared.AppZip;
 import aiss.shared.CCConnection;
 import aiss.shared.ConfC;
 import aiss.timestampServer.TimestampObject;
@@ -26,30 +24,27 @@ import aiss.timestampServer.TimestampObject;
  * um timestamp seguro Return do texto como header+email+anexo+certificado
  */
 public class Sender {
-
     private static final String ZIP_TEMP_FILE = "temp.zip";
     private static Key sharedSecretKey = null;
 
     /**
      * Main method
-     * 
-     * @param signed cipher timestamp fileEmailText outputFile attachment1 attachment2...
-     *            ex: false true false c://dario.txt c://goncalo.carito.img c://out.zip
-     * @throws Exception
      */
     public static void main(String[] args) throws Exception {
         boolean sign;
         boolean encrypt;
         boolean timestamp;
-        String emailTextFilename;
+        String emailInputDir;
         String outputFile;
 
-        byte[] dataBytes = new byte[1024];
+        args = new String[] { "False", "True", "True", "thunderbox/inbox",
+                "thunderbox/transferBox/email.out" };
+
         try {
             sign = Boolean.parseBoolean(args[0]);
             encrypt = Boolean.parseBoolean(args[1]);
             timestamp = Boolean.parseBoolean(args[2]);
-            emailTextFilename = args[3];
+            emailInputDir = args[3];
             outputFile = args[4];
         } catch (Exception e) {
             throw new Exception("Wrong parameters");
@@ -57,55 +52,52 @@ public class Sender {
 
         // //////////////////// ZIP FILES IF EXISTS ////////////////////////////////
         File arquivoZip = null;
-        if (args.length > 5) {
-            File filesToZip[] = new File[args.length - 5];
-            for (int i = 5; i < args.length; i++) {
-                filesToZip[i - 5] = new File(args[i]);
-            }
-            zipfiles(filesToZip, ZIP_TEMP_FILE);
-            arquivoZip = new File(ZIP_TEMP_FILE);
+        File inputDir = new File(emailInputDir);
+
+        if (!inputDir.isDirectory() || inputDir.list().length == 0) {
+            throw new Exception(
+                    "Input must be a directory containing at least a 'email.txt' file");
         }
-        // //////////////////// END-ZIP ////////////////////////////////
+        String[] filesNamesToZip = inputDir.list();
+        File filesToZip[] = new File[filesNamesToZip.length];
+        int k = 0;
+        for (String filename : filesNamesToZip) {
+            filesToZip[k++] = new File(inputDir, filename);
+        }
+        arquivoZip = zipfiles(filesToZip, ZIP_TEMP_FILE);
+
+        // ////////////////// END-ZIP ////////////////////////////////
 
         // Data transport object
         AissMime mimeObject = new AissMime();
 
-        // Read email file and attach to DTO
-        File emailTextFile = new File(emailTextFilename);
-        byte[] data = AISSUtils.readFileToByteArray(emailTextFile);
-        mimeObject.emailTextLenght = data.length;
-
         // Read ZIP File and attach to mimo
-        if (arquivoZip != null) {
-            System.out.println("Create archive");
-            byte[] zip = AISSUtils.readFileToByteArray(arquivoZip);
-            mimeObject.zipLenght = zip.length;
-            data = AISSUtils.concatByteArray(data, zip);
-        }
+        System.out.println("Create archive");
+        mimeObject.data = AISSUtils.readFileToByteArray(arquivoZip);
+
+        new File("ziptempfolder").delete();
+
 
 
         // Assinar
         if (sign) {
             System.out.println("Sign");
-            byte[] signature = signDataUsingCC(data);
-            mimeObject.dataSignLengh = signature.length;
-            data = AISSUtils.concatByteArray(data, signature);
+            mimeObject.signature = signDataUsingCC(mimeObject.data);
             mimeObject.certificate = getCCCertificate();
         }
 
+
+        // TODO Cifro a assinatura tambem?
         // Cifrar com a caixa
         mimeObject.ciphered = encrypt;
         if (encrypt) {
             System.out.println("Ciphering...");
-            data = cipherWithBox(data);
+            mimeObject.data = cipherWithBox(mimeObject.data);
         }
-
-        mimeObject.rawdata = data;
-
 
         if (timestamp) {
             System.out.println("Timestamping");
-            mimeObject.timestamp = getSecureTimeStamp(data);
+            mimeObject.timestamp = getSecureTimeStamp(mimeObject.data);
         }
         // Serializar e guardar no ficheiro de saida
         ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outputFile));
@@ -119,8 +111,9 @@ public class Sender {
         }
     }
 
-    private static AppZip zipfiles(File[] arquivos, String outputZip) throws Exception {
-        return new AppZip(arquivos, outputZip);
+    private static File zipfiles(File[] arquivos, String outputZip) throws Exception {
+        new AppZip(arquivos, outputZip);
+        return new File(outputZip);
     }
 
     private static byte[] signDataUsingCC(byte[] data) throws Exception {
@@ -149,8 +142,12 @@ public class Sender {
             ClassNotFoundException {
         // Ler o return e devolver o return
         Socket socket = new Socket(ConfC.TS_SERVER_HOST, ConfC.TS_SERVER_PORT);
-        InputStream stream = socket.getInputStream();
-        ObjectInputStream in = new ObjectInputStream(stream);
+        ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+        TimestampObject sendToTSSign = new TimestampObject(hash);
+        oos.writeObject(sendToTSSign);
+        // Wait server
         Object obj = in.readObject();
         TimestampObject tsObj = (TimestampObject) obj;
         socket.close();
