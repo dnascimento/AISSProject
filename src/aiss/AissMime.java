@@ -29,6 +29,13 @@ public class AissMime
     public X509Certificate certificate;
 
 
+    public void cleanState() {
+        certificate = null;
+        timestamp = null;
+        signature = null;
+    }
+
+
 
 
 }

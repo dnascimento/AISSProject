@@ -18,6 +18,8 @@ import aiss.shared.CCConnection;
 import aiss.shared.ConfC;
 import aiss.timestampServer.TimestampObject;
 
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+
 
 /**
  * Ler o certificado do cart‹o de cidad‹o Compressao da mensagem Cifrar com a box Associar
@@ -68,7 +70,7 @@ public class Sender {
 
         // ////////////////// END-ZIP ////////////////////////////////
 
-        // Data transport object
+        // Data transport object (DTO)
         AissMime mimeObject = new AissMime();
 
         // Read ZIP File and attach to mimo
@@ -78,7 +80,6 @@ public class Sender {
         new File("ziptempfolder").delete();
 
 
-
         // Assinar
         if (sign) {
             System.out.println("Sign");
@@ -86,22 +87,30 @@ public class Sender {
             mimeObject.certificate = getCCCertificate();
         }
 
-
-        // TODO Cifro a assinatura tambem?
-        // Cifrar com a caixa
-        mimeObject.ciphered = encrypt;
-        if (encrypt) {
-            System.out.println("Ciphering...");
-            mimeObject.data = cipherWithBox(mimeObject.data);
-        }
-
         if (timestamp) {
             System.out.println("Timestamping");
             mimeObject.timestamp = getSecureTimeStamp(mimeObject.data);
         }
+
+        // Cifrar com a caixa
+        mimeObject.ciphered = encrypt;
+        if (encrypt) {
+            System.out.println("Ciphered");
+            byte[] data = AISSUtils.ObjectToByteArray(mimeObject);
+            mimeObject.data = cipherWithBox(data);
+            mimeObject.cleanState();
+        }
+
+
         // Serializar e guardar no ficheiro de saida
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(outputFile));
-        oos.writeObject(mimeObject);
+
+        // Base64 para guardar
+        byte[] objBytes = AISSUtils.ObjectToByteArray(mimeObject);
+        String objString = Base64.encode(objBytes);
+        // TODO Escrever em ficheiro de texto objString
+         FileOutputStream out = new FileOutputStream(outputFile);
+         out.wri
+        oos.writeObject(objString);
         oos.flush();
         oos.close();
         System.out.println("Done");
