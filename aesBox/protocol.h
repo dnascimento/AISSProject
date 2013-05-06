@@ -137,7 +137,7 @@ char  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out);
 
 	@return  Code of the packet
 */
-char get_packet_data(packet_t * p, u8 * data, u32 *size);
+//char get_packet_data(packet_t *p, u8 * data, u32* size);
 
- #endif
+#endif
 

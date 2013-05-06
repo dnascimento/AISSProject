@@ -17,8 +17,6 @@ import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-
 import aiss.AissMime;
 import aiss.shared.AISSUtils;
 import aiss.shared.ConfC;
@@ -60,12 +58,12 @@ public class Receiver {
         // Ler o objecto
         File inputMailFile = new File(inputMailObject);
         ObjectInputStream ois = new ObjectInputStream(new FileInputStream(inputMailFile));
-        //TODO ler ficheiro texto
+        // TODO ler ficheiro texto
         AissMime mimeObj = (AissMime) ois.readObject();
         ois.close();
         // TODO Usar base64 para descodificar
-        Base64.encode(arg0)
-        
+        // Base64.encode(arg0)
+
 
 
         // Decifrar os dados

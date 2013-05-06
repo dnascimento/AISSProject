@@ -108,11 +108,11 @@ public class Sender {
         byte[] objBytes = AISSUtils.ObjectToByteArray(mimeObject);
         String objString = Base64.encode(objBytes);
         // TODO Escrever em ficheiro de texto objString
-         FileOutputStream out = new FileOutputStream(outputFile);
-         out.wri
-        oos.writeObject(objString);
-        oos.flush();
-        oos.close();
+        FileOutputStream out = new FileOutputStream(outputFile);
+        // out.wri
+        // oos.writeObject(objString);
+        // oos.flush();
+        // oos.close();
         System.out.println("Done");
         // Clean temp fiz
         if (arquivoZip != null) {

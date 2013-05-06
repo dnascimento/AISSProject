@@ -18,26 +18,18 @@ JNIEXPORT jchar JNICALL Java_AesBox_init
 /*
  * Class:     AesBox
  * Method:    update
- * Signature: ([BI[BI)C
+ * Signature: ([BI[B)C
  */
 JNIEXPORT jchar JNICALL Java_AesBox_update
-  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray, jint);
+  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
 
 /*
  * Class:     AesBox
  * Method:    doFinal
- * Signature: ([BI)C
+ * Signature: ([BI[B)C
  */
-JNIEXPORT jchar JNICALL Java_AesBox_doFinal___3BI
-  (JNIEnv *, jobject, jbyteArray, jint);
-
-/*
- * Class:     AesBox
- * Method:    doFinal
- * Signature: ([BI[BI)C
- */
-JNIEXPORT jchar JNICALL Java_AesBox_doFinal___3BI_3BI
-  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray, jint);
+JNIEXPORT jchar JNICALL Java_AesBox_doFinal
+  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
 
 #ifdef __cplusplus
 }
