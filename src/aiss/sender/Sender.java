@@ -39,7 +39,7 @@ public class Sender {
         String emailInputDir;
         String outputFile;
 
-        args = new String[] { "False", "True", "True", "thunderbox/inbox",
+        args = new String[] { "False", "True", "False", "thunderbox/inbox",
                 "thunderbox/transferBox/email.out" };
 
         try {
