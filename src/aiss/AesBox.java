@@ -1,6 +1,7 @@
 package aiss;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import aiss.shared.Mode;
 
@@ -11,7 +12,8 @@ import aiss.shared.Mode;
 public class AesBox {
     public byte[] data_out;
     public int size_out;
-    public static int MAX_BUFFER_BOX = 68832;
+    public static int MAX_BUFFER_IN = 68832;
+    public static int MAX_BUFFER_OUT = 68864;
 
     /*
      * Init box AES Algo
@@ -35,13 +37,22 @@ public class AesBox {
      * @return data cyphered
      */
     public byte[] update(byte[] data_in) {
-        byte[][] fragments = splitDataToBox(data_in);
-        byte[] buffer = new byte[MAX_BUFFER_BOX];
+        byte[] bufferIn = new byte[MAX_BUFFER_IN];
+        byte[] bufferOut = new byte[MAX_BUFFER_OUT];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for (int i = 0; i < fragments.length; i++) {
-            update(fragments[i], buffer);
-            outputStream.write(buffer, 0, size_out);
+        int lenDataLeft = data_in.length;
+        int i = 0;
+        while (lenDataLeft > MAX_BUFFER_IN) {
+            System.arraycopy(data_in, i * MAX_BUFFER_IN, bufferIn, 0, MAX_BUFFER_IN);
+            update(bufferIn, MAX_BUFFER_IN, bufferOut);
+            outputStream.write(bufferOut, 0, size_out);
+            lenDataLeft = lenDataLeft - MAX_BUFFER_IN;
         }
+        System.arraycopy(data_in, i * MAX_BUFFER_IN, bufferIn, 0, lenDataLeft);
+        System.out.println("Do update");
+        update(bufferIn, bufferIn.length, bufferOut);
+        System.out.println("Do update:" + size_out);
+        outputStream.write(bufferOut, 0, size_out);
         return outputStream.toByteArray();
     }
 
@@ -53,69 +64,63 @@ public class AesBox {
      * @return
      */
     public byte[] doFinal(byte[] data_in) {
-        byte[][] fragments = splitDataToBox(data_in);
-        byte[] buffer = new byte[MAX_BUFFER_BOX];
+        byte[] bufferIn = new byte[MAX_BUFFER_IN];
+        byte[] bufferOut = new byte[MAX_BUFFER_OUT];
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        int i;
-        for (i = 0; i < fragments.length - 1; i++) {
-            update(fragments[i], buffer);
-            outputStream.write(buffer, 0, size_out);
+        int lenDataLeft = data_in.length;
+        int i = 0;
+        while (lenDataLeft > MAX_BUFFER_IN) {
+            System.arraycopy(data_in, i * MAX_BUFFER_IN, bufferIn, 0, MAX_BUFFER_IN);
+            update(bufferIn, MAX_BUFFER_IN, bufferOut);
+            outputStream.write(bufferOut, 0, size_out);
+            lenDataLeft = lenDataLeft - MAX_BUFFER_IN;
         }
-        doFinal(fragments[i], buffer);
-        outputStream.write(buffer, 0, size_out);
-
+        System.arraycopy(data_in, i * MAX_BUFFER_IN, bufferIn, 0, lenDataLeft);
+        System.out.println("Do final");
+        doFinal(bufferIn, lenDataLeft, bufferOut);
+        System.out.println("Do final: " + bufferOut);
+        outputStream.write(bufferOut, 0, size_out);
         return outputStream.toByteArray();
     }
-
-    private byte[][] splitDataToBox(byte[] data) {
-        int numFragments = (int) Math.ceil(data.length / MAX_BUFFER_BOX);
-        byte[][] out = new byte[numFragments][];
-        for (int i = 0; i < numFragments; i++) {
-            byte[] buffer = new byte[MAX_BUFFER_BOX];
-            System.arraycopy(data, MAX_BUFFER_BOX * i, buffer, 0, MAX_BUFFER_BOX);
-            out[i] = buffer;
-        }
-        return out;
-    }
-
 
 
     // //////////////// Private Area - API TO BOX /////////////////////////////////
     private native char init(int mode);
 
-    private native char update(byte[] data_in, byte[] data_out);
+    private native char update(byte[] data_in, int size_in, byte[] data_out);
 
     // int size_out
-    private native char doFinal(byte[] data_in, byte[] data_out);
+    private native char doFinal(byte[] data_in, int size_in, byte[] data_out);
 
     static {
-        // System.out.println(System.getProperty("java.library.path"));
-        // String current = System.getProperty("java.library.path");
-        // System.setProperty("java.library.path", current + ":bin/libaesbox.jnilib")
-        // ystem.out.println(System.getProperty("java.library.path"));
-
         System.loadLibrary("aesbox");
     }
 
     public static void main(String args[]) {
-
         AesBox box = new AesBox();
         byte[] plain = new byte[] { 97, 12, 32 };
-        byte[] out = new byte[20];
-
+        byte[] plainOut = new byte[MAX_BUFFER_OUT];
+        byte[] out = new byte[MAX_BUFFER_OUT];
         System.out.println("TEST INIT");
         box.init(Mode.Cipher);
 
         System.out.println("Cipher:");
-        box.doFinal(plain, out);
-        //
-        // System.out.println("Test Decipher");
-        // System.out.println("init: " + box.init(Mode.Decipher));
-        //
+        out = box.doFinal(plain);
+        System.out.println(out);
+
+        System.out.println("Test Decipher");
+        box.init(Mode.Decipher);
+
         // System.out.println("Decipher:");
-        // out = box.doFinal(plain);
-        // System.out.println("data out" + out + "    vs    " + plain + " size: "
-        // + box.size_out + "equals: " + Arrays.equals(plain, out));
+        plainOut = box.doFinal(out);
+
+        for (int i = 0; i < plain.length; i++) {
+            if (plain[i] != plainOut[i]) {
+                System.out.println("DIFFERENT");
+            }
+        }
+        System.out.println("data out" + plain + "    vs    " + plainOut + " size: "
+                + box.size_out + "equals: " + Arrays.equals(plain, plainOut));
 
     }
 }

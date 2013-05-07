@@ -34,9 +34,7 @@ JNIEXPORT jchar JNICALL Java_aiss_AesBox_init (JNIEnv * env, jobject obj, jint j
 	}
 
 	printf("Init mode: %d\n",mode);
-    
 	char result =  init(mode);
-	printf("Init done");
 	return result;
 }
 
@@ -46,29 +44,24 @@ JNIEXPORT jchar JNICALL Java_aiss_AesBox_init (JNIEnv * env, jobject obj, jint j
  * Signature: ([BI[BI)C
  */
 //char  update(u8 * data_in, u32 size, u8 * data_out,u32 * size_out);
-JNIEXPORT jchar JNICALL Java_aiss_AesBox_update (JNIEnv * env, jobject obj, jbyteArray  jdata_in, jbyteArray jdata_out){
+JNIEXPORT jchar JNICALL Java_aiss_AesBox_update (JNIEnv * env, jobject obj, jbyteArray  jdata_in,jint jsize_in, jbyteArray jdata_out){
 	//Read data input
 	char * data_in =  (*env)->GetByteArrayElements(env,jdata_in,NULL);
 	//Read data input size
-	u32 size_in = (u32) sizeof(data_in);
+	u32 size_in = (u32) jsize_in;
 
 	u8* data_out;
 	u32 size_out;
 
-	//Output parameters on object
+	 //Output parameters on object
 	 jclass classAesBox = (*env)->GetObjectClass(env, obj);
 	 //Get reference
 	 jfieldID obj_size_out = (*env)->GetFieldID(env, classAesBox, "size_out", "I");
 
-    
-    
 	char result = update(data_in, size_in,data_out,&size_out);
 	(*env)->SetIntField(env, obj, obj_size_out, size_out);
 	(*env)->SetByteArrayRegion(env, jdata_out, 0,size_out,data_out);
     return result;
-//	 (*env)->SetIntField(env, obj, obj_size_out, 69);
-//	 (*env)->SetByteArrayRegion(env, jdata_out, 0,jsize_in,data_in);
-//	 return 'b';
 }
 
 
@@ -77,16 +70,15 @@ JNIEXPORT jchar JNICALL Java_aiss_AesBox_update (JNIEnv * env, jobject obj, jbyt
  * Method:    doFinal
  * Signature: ([BI[B)C
  */
-JNIEXPORT jchar JNICALL Java_aiss_AesBox_doFinal (JNIEnv * env, jobject obj, jbyteArray jdata_in, jbyteArray jdata_out){
+JNIEXPORT jchar JNICALL Java_aiss_AesBox_doFinal (JNIEnv * env, jobject obj, jbyteArray jdata_in,jint jsize_in, jbyteArray jdata_out){
 	printf("\n Do final start\n");
 
 	//Read data input
 	char * data_in =  (*env)->GetByteArrayElements(env,jdata_in,NULL);
 	//Read data input size
-	u32 size_in = (u32) sizeof(data_in);
 
-
-	u8* data_out = (u8*) jdata_out;
+	u32 size_in = (u32) jsize_in;
+	u8 data_out[MAX_DATA_OUT];
 	u32 size_out;
 
 	//Output parameters on object
@@ -94,18 +86,14 @@ JNIEXPORT jchar JNICALL Java_aiss_AesBox_doFinal (JNIEnv * env, jobject obj, jby
 	 //Get reference
 	 jfieldID obj_size_out = (*env)->GetFieldID(env, classAesBox, "size_out", "I");
 
-
+		printf("\n Do final lets go \n");
 	char result = doFinal(data_in,size_in,data_out,&size_out);
+	printf("\n Do final after \n");
 	(*env)->SetIntField(env, obj, obj_size_out, size_out);
 	(*env)->SetByteArrayRegion(env, jdata_out, 0,size_out,data_out);
 
 	printf("\n Do final end \n");
-
-	 return result;
-
-	 //(*env)->SetIntField(env, obj, obj_size_out, 69);
-	 //(*env)->SetByteArrayRegion(env, jdata_out, 0,jsize_in,data_in);
-	 //return 'b';
+	return '0';
 }
 
 

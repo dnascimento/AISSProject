@@ -7,30 +7,29 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     AesBox
- * Method:    init
- * Signature: (I)C
- */
-JNIEXPORT jchar JNICALL Java_aiss_AesBox_init
-  (JNIEnv *, jobject, jint);
-
-/*
- * Class:     AesBox
- * Method:    update
- * Signature: ([BI[B)C
- */
-JNIEXPORT jchar JNICALL Java_aiss_AesBox_update
-  (JNIEnv *, jobject, jbyteArray, jbyteArray);
-
-/*
- * Class:     AesBox
- * Method:    doFinal
- * Signature: ([BI[B)C
- */
-JNIEXPORT jchar JNICALL Java_aiss_AesBox_doFinal
-  (JNIEnv *, jobject, jbyteArray, jbyteArray);
-
+    /*
+     * Class:     aiss_AesBox
+     * Method:    init
+     * Signature: (I)C
+     */
+    JNIEXPORT jchar JNICALL Java_aiss_AesBox_init
+    (JNIEnv *, jobject, jint);
+    
+    /*
+     * Class:     aiss_AesBox
+     * Method:    update
+     * Signature: ([BI[B)C
+     */
+    JNIEXPORT jchar JNICALL Java_aiss_AesBox_update
+    (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
+    
+    /*
+     * Class:     aiss_AesBox
+     * Method:    doFinal
+     * Signature: ([BI[B)C
+     */
+    JNIEXPORT jchar JNICALL Java_aiss_AesBox_doFinal
+    (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
 #ifdef __cplusplus
 }
 #endif
