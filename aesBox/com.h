@@ -4,11 +4,10 @@
 #define FPGA_PORT 12120
 
 
-
-typedef unsigned char	u8;	
-typedef unsigned short	u16;	
+typedef struct sockaddr SOCKADDR;
+typedef unsigned char	u8;
+typedef unsigned short	u16;
 typedef unsigned int	u32;
-
 
 int  COMinit(); 
 

@@ -21,6 +21,7 @@ public class AISSUtils {
     private static final int BUFFER_SIZE = 1024;
 
 
+
     public static byte[] ObjectToByteArray(Object obj) throws Exception {
         if (obj == null) {
             return null;

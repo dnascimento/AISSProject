@@ -2,8 +2,8 @@
 #include <jni.h>
 /* Header for class AesBox */
 
-#ifndef _Included_AesBox
-#define _Included_AesBox
+#ifndef _Included_aiss_AesBox
+#define _Included_aiss_AesBox
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,7 +12,7 @@ extern "C" {
  * Method:    init
  * Signature: (I)C
  */
-JNIEXPORT jchar JNICALL Java_AesBox_init
+JNIEXPORT jchar JNICALL Java_aiss_AesBox_init
   (JNIEnv *, jobject, jint);
 
 /*
@@ -20,16 +20,16 @@ JNIEXPORT jchar JNICALL Java_AesBox_init
  * Method:    update
  * Signature: ([BI[B)C
  */
-JNIEXPORT jchar JNICALL Java_AesBox_update
-  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
+JNIEXPORT jchar JNICALL Java_aiss_AesBox_update
+  (JNIEnv *, jobject, jbyteArray, jbyteArray);
 
 /*
  * Class:     AesBox
  * Method:    doFinal
  * Signature: ([BI[B)C
  */
-JNIEXPORT jchar JNICALL Java_AesBox_doFinal
-  (JNIEnv *, jobject, jbyteArray, jint, jbyteArray);
+JNIEXPORT jchar JNICALL Java_aiss_AesBox_doFinal
+  (JNIEnv *, jobject, jbyteArray, jbyteArray);
 
 #ifdef __cplusplus
 }

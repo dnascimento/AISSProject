@@ -14,18 +14,24 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-
+import aiss.AesBox;
 import aiss.AissMime;
 import aiss.shared.AISSUtils;
 import aiss.shared.ConfC;
+import aiss.shared.Mode;
 import aiss.timestampServer.TimestampObject;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 
-
+/**
+ * Receiver main class: Retrieves args:
+ * 
+ * @param Email Object input
+ * @param Folder to output The email object contains all information to decipher itself.
+ *            The data in email object is deciphered, sign checked, timestamp checked and
+ *            then unziped into destination folder
+ */
 public class Receiver {
     private static final String CERTIFICATE_DIR = "CACertificates";
     private static final boolean[] AUTH_CERT_KEY_USAGE = { true, false, false, false,
@@ -103,6 +109,8 @@ public class Receiver {
                                               mimeObj.certificate);
             if (isSigned) {
                 System.out.println("Assinatura v‡lida");
+                System.out.println("This email is sign by: "
+                        + extractCertificateOwner(mimeObj.certificate));
             } else {
                 System.out.println("Assinatura inv‡lida");
                 return;
@@ -129,6 +137,15 @@ public class Receiver {
          */
     }
 
+    /**
+     * Check Portuguse Citzan Card digital signature
+     * 
+     * @param clearText: original text
+     * @param signature: signature
+     * @param certificate: Citzen Card certificate
+     * @return: signed or not
+     * @throws Exception
+     */
     public static Boolean checkSignature(
             byte[] clearText,
                 byte[] signature,
@@ -144,12 +161,20 @@ public class Receiver {
     }
 
 
+    public static String extractCertificateOwner(X509Certificate cert) {
+        return cert.getSubjectDN().getName();
+    }
+
+
     public static byte[] decipherAES(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
-        byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
-        cipher.init(Cipher.DECRYPT_MODE, loadKey(), ivspec);
-        return cipher.doFinal(data);
+        AesBox box = new AesBox();
+        box.init(Mode.Decipher);
+        return box.doFinal(data);
+        // Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
+        // byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        // IvParameterSpec ivspec = new IvParameterSpec(iv);
+        // cipher.init(Cipher.DECRYPT_MODE, loadKey(), ivspec);
+        // return cipher.doFinal(data);
     }
 
     /*

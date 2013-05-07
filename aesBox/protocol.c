@@ -21,6 +21,7 @@ void reset( )
 
 char init( u32 mode)
 {
+	printf("PROTOCOL:Init: %d \n",mode);
 	u8 buffer[MAX_PACKET_DATA];
 	u32 size;
 
@@ -38,7 +39,6 @@ char init( u32 mode)
 
 char  update_int(u8 * data_in, u32 size, u8 * data_out,u32 * rbytes, char fin_code)
 {
-
 	static u32 bbytes = 0;
 	static u8 buffer[MAX_PACKET_RAW_DATA];
 	u32 size_int,n,i;
@@ -178,11 +178,15 @@ char  update_int(u8 * data_in, u32 size, u8 * data_out,u32 * rbytes, char fin_co
 
 char  update(u8 * data_in, u32 size, u8 * data_out,u32 * size_out)
 {
+	printf("PROTOCOL:update\n");
+
 	return update_int(data_in, size,data_out, size_out,UPDATE_CODE);
 }
 
-char overloaded  doFinal(u8 * data_out,u32 *size_out)
+char doFinal_small(u8 * data_out,u32 *size_out)
 {
+	printf("PROTOCOL:small\n");
+
 	u32 n;
 	char ret_code;
 
@@ -194,8 +198,10 @@ char overloaded  doFinal(u8 * data_out,u32 *size_out)
 	return ret_code;
 }
 
-char overloaded  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out)
+char   doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out)
 {
+	printf("PROTOCOL:doFinal\n");
+
 	u32 n;
 	char ret_code;
 
@@ -210,7 +216,7 @@ char overloaded  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out)
 	*size_out = n;
 
 	/* Final transfer, ask for the last block (padded if needed)*/
-	ret_code = doFinal(&(data_out[n]),&n);
+	ret_code = doFinal_small(&(data_out[n]),&n);
 	/* update number of received bytes*/
 	*size_out += n;
 	/* Return code*/
@@ -259,7 +265,7 @@ char overloaded  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out)
 	#endif
 }
 
- void overloaded  form_packet(packet_t * p, u8 * data, u32 size, char  code)
+ void form_packet(packet_t * p, u8 * data, u32 size, char  code)
 {
 	if(data!=NULL)
 		memcpy((u8*)p->field.data,data,size);
@@ -277,7 +283,7 @@ char overloaded  doFinal(u8 * data_in, u32 size,u8 * data_out,u32 *size_out)
 
 }
 
- void overloaded  form_packet_header(packet_t * p, u32 size,char code)
+ void form_packet_header(packet_t * p, u32 size,char code)
 {
 	p->field.code_op[0] = code;
 	p->field.code_op[1] = code;

@@ -1,26 +1,21 @@
 package aiss.sender;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.security.Key;
 import java.security.cert.X509Certificate;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-
+import aiss.AesBox;
 import aiss.AissMime;
 import aiss.shared.AISSUtils;
 import aiss.shared.CCConnection;
 import aiss.shared.ConfC;
+import aiss.shared.Mode;
 import aiss.timestampServer.TimestampObject;
 
 import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
@@ -108,14 +103,14 @@ public class Sender {
 
 
         // Serializar e guardar no ficheiro de saida
-        
+
 
         // Base64 para guardar
         byte[] objBytes = AISSUtils.ObjectToByteArray(mimeObject);
         String objString = Base64.encode(objBytes);
         // escreve em ficheiro de texto o objString
         BufferedWriter out = new BufferedWriter(new FileWriter(outputFile));
-        //PrintWriter out = new PrintWriter(outputFile);
+        // PrintWriter out = new PrintWriter(outputFile);
         out.write(objString);
         out.close();
         System.out.println("Done");
@@ -135,12 +130,15 @@ public class Sender {
     }
 
     private static byte[] cipherWithBox(byte[] data) throws Exception {
-        Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
-        IvParameterSpec ivspec = new IvParameterSpec(ConfC.IV);
-        cipher.init(Cipher.ENCRYPT_MODE, loadKey(), ivspec);
-        return cipher.doFinal(data);
-    }
+        AesBox box = new AesBox();
+        box.init(Mode.Cipher);
+        return box.doFinal(data);
+        // Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
+        // IvParameterSpec ivspec = new IvParameterSpec(ConfC.IV);
+        // cipher.init(Cipher.ENCRYPT_MODE, loadKey(), ivspec);
+        // return cipher.doFinal(data);
 
+    }
 
     private static Key loadKey() throws Exception {
         if (sharedSecretKey != null) {

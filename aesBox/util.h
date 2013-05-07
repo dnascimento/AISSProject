@@ -6,8 +6,8 @@
 #include "ethcom.h"
 #include <stdlib.h>     /* for exit() */
 #include <string.h>
-#include "winsock.h"    /* for socket(),... */
-#include <Windows.h>
+//#include "winsock.h"    /* for socket(),... */
+//#include <Windows.h>
 //#include "usbcom.h"
 
 int InsPadding(unsigned char barr[EPLENGTH],int n);

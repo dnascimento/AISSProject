@@ -2,7 +2,11 @@
 #include <stdlib.h>     /* for exit() */
 #include <string.h>
 #include <stdio.h>
-#include "winsock.h"    /* for socket(),... */
+//#include "winsock.h"    /* for socket(),... */
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+
 
 static int fd;
 static struct sockaddr_in servaddr,cliaddr,SenderAddr;
@@ -12,21 +16,23 @@ int  COMinit()
 {
 	int n;
 	unsigned short Port = 27015;
-    WSADATA wsaData;
+   // WSADATA wsaData;
 
 	// Initialize Winsock
-    n = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (n != NO_ERROR)
-	{
-        printf("WSAStartup failed with error: %d\n", n);
-        return -1;
-    }
+   // n = WSAStartup(MAKEWORD(2, 2), &wsaData);
+   // if (n != NO_ERROR)
+	//{
+       // printf("WSAStartup failed with error: %d\n", n);
+     //   return -1;
+   // }
+    
+    
 
     // Create a socket for sending data
     fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (fd == INVALID_SOCKET) {
-        printf("socket failed with error: %ld\n", WSAGetLastError());
-        WSACleanup();
+    if (fd < 0) {
+        printf("socket failed with error");
+        //WSACleanup();
         return -1;
     }
     servaddr.sin_family = AF_INET;
@@ -39,8 +45,11 @@ int  COMinit()
     cliaddr.sin_port = htons(Port);
     cliaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    n = bind(fd, (SOCKADDR *) & cliaddr, sizeof (cliaddr));
-
+    n = bind(fd, (struct sockaddr *) & cliaddr, sizeof (cliaddr));
+    if(n < 0){
+        printf("ERROR on binding");
+    }
+    
    return fd;
 }
 
@@ -48,7 +57,7 @@ int  COMinit()
 int sendPacket(u8 *data,u32 size)
 {
 
-	return  sendto(fd,(char*)data,size, 0, (SOCKADDR *) & servaddr, sizeof (servaddr));
+	return  sendto(fd,(char*)data,size, 0, (struct sockaddr *) & servaddr, sizeof (servaddr));
 
 }
 int recvPacket(u8 *buf, u32 size)
@@ -57,9 +66,9 @@ int recvPacket(u8 *buf, u32 size)
 
 	int n;
 
-	n = recvfrom(fd,(char*) buf,size, 0, (SOCKADDR *) & SenderAddr, &SenderAddrSize);
+	n = recvfrom(fd,(char*) buf,size, 0, (struct sockaddr *) & SenderAddr, &SenderAddrSize);
 	if(n==-1)
-		 printf("recvfrom error %d\n", WSAGetLastError());
-	n=  recvfrom(fd,(char*) buf,size, 0, (SOCKADDR *) & SenderAddr, &SenderAddrSize);
+		 printf("recvfrom error\n");
+	n=  recvfrom(fd,(char*) buf,size, 0, (struct sockaddr *) & SenderAddr, &SenderAddrSize);
 	return n;
 }
