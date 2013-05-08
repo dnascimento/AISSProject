@@ -12,6 +12,7 @@ import java.security.cert.X509Certificate;
 
 import aiss.AesBox;
 import aiss.AissMime;
+import aiss.interf.AISSInterface;
 import aiss.shared.AISSUtils;
 import aiss.shared.CCConnection;
 import aiss.shared.ConfC;
@@ -40,8 +41,8 @@ public class Sender {
         File inputDir = new File(emailInputDir);
 
         if (!inputDir.isDirectory() || inputDir.list().length == 0) {
-            throw new Exception(
-                    "Input must be a directory containing at least a 'email.txt' file");
+        	AISSInterface.logsender.append("LOAD - Input must be a directory containing at least one file\n");
+            return;
         }
         arquivoZip = zipfiles(inputDir, ZIP_TEMP_FILE);
 
@@ -60,22 +61,28 @@ public class Sender {
         // Assinar
         if (sign) {
             System.out.println("Sign");
+        	AISSInterface.logsender.append("SIGN - signing...\n");
             mimeObject.signature = signDataUsingCC(mimeObject.data);
             mimeObject.certificate = getCCCertificate();
+            AISSInterface.logsender.append("SIGN - success.\n");
         }
 
         if (timestamp) {
             System.out.println("Timestamping");
+            AISSInterface.logsender.append("TIMESTAMP - applying...\n");
             mimeObject.timestamp = getSecureTimeStamp(mimeObject.data);
+            AISSInterface.logsender.append("TIMESTAMP - success.\n");
         }
 
         // Cifrar com a caixa
         mimeObject.ciphered = encrypt;
         if (encrypt) {
             System.out.println("Ciphered");
+            AISSInterface.logsender.append("CIPHER - ciphering...\n");
             byte[] data = AISSUtils.ObjectToByteArray(mimeObject);
             mimeObject.data = cipherWithBox(data);
             mimeObject.cleanState();
+            AISSInterface.logsender.append("CIPHER - success.\n");
         }
 
 
@@ -90,6 +97,10 @@ public class Sender {
         // PrintWriter out = new PrintWriter(outputFile);
         out.write(objString);
         out.close();
+        
+        // invoke thunderbird with attachment added
+        openThunderbird(new File(outputFile).getAbsolutePath());
+        
         System.out.println("Done");
         // Clean temp fiz
         if (arquivoZip != null) {
@@ -154,5 +165,14 @@ public class Sender {
         default:
             throw new Exception("Invalid Key type");
         }
+    }
+    
+    public static void openThunderbird(String file){
+    	Runtime rt = Runtime.getRuntime();
+    	try {
+			Process pr = rt.exec(new String[] {"open","/Applications/Thunderbird.app","--args","-compose","attachment="+file});
+		} catch (IOException e) {
+			AISSInterface.logsender.append("Thunderbird was not found in your system.\n");
+		}
     }
 }

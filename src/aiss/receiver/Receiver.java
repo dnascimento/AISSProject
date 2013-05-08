@@ -59,7 +59,6 @@ public class Receiver {
         BufferedReader in = new BufferedReader(new FileReader(inputMailFile));
         StringBuilder sb = new StringBuilder();
         String line = in.readLine();
-        AISSInterface aiss = new AISSInterface();
 
         while (line != null) {
             sb.append(line);
@@ -74,21 +73,21 @@ public class Receiver {
 
         // Decifrar os dados
         if (mimeObj.ciphered) {
-            System.out.println("DECIPHER - Starting Decipher...");
-            aiss.appendLogReceiver("DECIPHER - Starting Decipher...");
+            System.out.println("DECIPHER - Starting Decipher...\n");
+            AISSInterface.logreceiver.append("DECIPHER- Starting decipher...\n" );
             byte[] data = decipherAES(mimeObj.data);
             mimeObj = (AissMime) AISSUtils.ByteArrayToObject(data);
             System.out.println("DECIPHER - Success.");
-            aiss.appendLogReceiver("DECIPHER - Success.");
+            AISSInterface.logreceiver.append("DECIPHER - Success.\n");
         }
 
 
 
         // Checktimestamp sign
         if (mimeObj.timestamp != null) {
-        	aiss.appendLogReceiver("TIMESTAMP - Starting TimeStamp Check...");
+        	AISSInterface.logreceiver.append("TIMESTAMP - Starting timestamp verification...\n" );
         	Date timestampDate = checkTimeStampSignature(mimeObj.data, mimeObj.timestamp);
-        	aiss.appendLogReceiver("TIMESTAMP - TimeStamp Sign: " + timestampDate);
+        	AISSInterface.logreceiver.append("TIMESTAMP - Timestamp Sign: " + timestampDate + "\n");
         	System.out.println("TIMESTAMP - Timestamp Sign: " + timestampDate);
         }
 
@@ -96,8 +95,7 @@ public class Receiver {
 
         // Sacar a assinatura
         if (mimeObj.signature != null) {
-            System.out.println("Checktimestamp");
-
+        	AISSInterface.logreceiver.append("SIGN - Starting signature verification...\n" );
             if (mimeObj.certificate == null) {
                 throw new Exception("Mail without certificate");
             }
@@ -106,11 +104,13 @@ public class Receiver {
                                               mimeObj.certificate);
             if (isSigned) {
                 System.out.println("Assinatura v‡lida");
+                AISSInterface.logreceiver.append("SIGN - Signature is valid.\n" );
                 System.out.println("This email is sign by: "
                         + extractCertificateOwner(mimeObj.certificate));
+                AISSInterface.logreceiver.append("SIGN - This email is signed by " + extractCertificateOwner(mimeObj.certificate) + "\n");
             } else {
                 System.out.println("Assinatura inv‡lida");
-                return;
+                AISSInterface.logreceiver.append("SIGN - ATTENTION: Signature is NOT valid.\n" );
             }
         }
 
@@ -120,13 +120,14 @@ public class Receiver {
         }
 
         File outDirectory = generateNewDirectory(outMainDirectory);
+        System.out.println("generate directory");
         UnZip unZip = new UnZip();
         unZip.unZipIt(mimeObj.data, outDirectory);
 
         // Unzip do conteudo para dentro da pasta
 
-        inputMailFile.delete();
-
+        //inputMailFile.delete();
+        System.out.println("Receiver done (all work)");
         // TODO escrever o log de resultado
         /**
          * Create 2 files and 1 directory: - email.txt -> clean email text - attachments
@@ -167,12 +168,7 @@ public class Receiver {
 
     public static byte[] decipherAES(byte[] data) throws Exception {
         AesBox box = new AesBox();
-        try{
-        box.init(Mode.Decipher);}
-        catch(Exception e){
-        	System.out.println("decipherAES: error with AesBox.");
-        	throw new Exception("decipherAES: error with AesBox.");
-        }
+        box.init(Mode.Decipher);
         return box.doFinal(data);
         // Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
         // byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -284,7 +280,7 @@ public class Receiver {
         int i = childDirsName.length;
         while (true) {
             boolean exits = false;
-            String newName = "out" + i;
+            String newName = "out" + i++;
             for (String filename : childDirsName) {
                 if (newName.equals(filename)) {
                     exits = true;

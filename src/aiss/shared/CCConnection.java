@@ -38,6 +38,8 @@ import java.math.BigInteger;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+import aiss.interf.AISSInterface;
+
 import pteidlib.PTEID_ADDR;
 import pteidlib.PTEID_Certif;
 import pteidlib.PTEID_DH_Auth_Response;
@@ -110,10 +112,10 @@ public class CCConnection {
             }
 
             // Read Address
-            PTEID_ADDR adData = pteid.GetAddr();
-            if (null != adData) {
-                test.PrintAddressData(adData);
-            }
+           // PTEID_ADDR adData = pteid.GetAddr();
+          //  if (null != adData) {
+          //      test.PrintAddressData(adData);
+          //  }
 
             // Read Picture Data
             PTEID_PIC picData = pteid.GetPic();
@@ -178,7 +180,7 @@ public class CCConnection {
                                                null);
 
         } catch (NullPointerException e) {
-            throw new Exception("Insert your Citzen Card");
+            throw new Exception("Insert your Citizen Card");
         }
         // Token login
         pkcs11.C_Login(p11_session, 1, null);
@@ -282,7 +284,7 @@ public class CCConnection {
         byte[] fileAddr = { 0x3F, 0x00, 0x5F, 0x00, (byte) 0xEF, 0x05 };
 
         // Read the Address file
-
+        /*
         pteid.Init("");
         pteid.SetSODChecking(false);
 
@@ -297,16 +299,19 @@ public class CCConnection {
         System.out.println("  country = " + country);
 
         pteid.Exit(pteid.PTEID_EXIT_UNPOWER);
-
+*/	
         // Write to the Address file
 
         System.out.println("Changing country name to \"XX\"");
-
+        
+        PTEID_ADDR addr = pteid.CVC_GetAddr();
+        String country = addr.country;
+        
         pteid.Init("");
         pteid.SetSODChecking(false);
 
-        challenge = pteid.CVC_Init(cert1);
-        signat = SignChallenge(challenge);
+        byte[] challenge = pteid.CVC_Init(cert1);
+        byte[] signat = SignChallenge(challenge);
         pteid.CVC_Authenticate(signat);
 
         addr.country = "XX";

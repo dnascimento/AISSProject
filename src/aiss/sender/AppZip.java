@@ -11,6 +11,8 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 
+import aiss.interf.AISSInterface;
+
 public class AppZip {
     List<String> fileList;
 
@@ -26,10 +28,6 @@ public class AppZip {
         generateFileList(dir);
         zipIt(outputFile);
     }
-
-
-
-
 
     /**
      * Zip it
@@ -50,6 +48,7 @@ public class AppZip {
             for (String file : fileList) {
 
                 System.out.println("File Added : " + file);
+                AISSInterface.logsender.append("ZIP - file zipped: "+file +".\n");
                 ZipEntry ze = new ZipEntry(file);
                 zos.putNextEntry(ze);
 

@@ -19,7 +19,7 @@ public class ConfC {
 
     public static byte[] IV = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    public static int TS_SERVER_PORT = 5678;
+    public static int TS_SERVER_PORT = 5676;
     public static String TS_SERVER_HOST = "localhost";
 
 }

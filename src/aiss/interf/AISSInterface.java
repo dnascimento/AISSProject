@@ -27,6 +27,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
@@ -60,8 +61,8 @@ public class AISSInterface extends
     JPanel homePanel;
     JCheckBox signCB , cipherCB, timestampCB;
     JTextArea maininfo;
-    JTextArea logsender;
-    JTextArea logreceiver;
+    public static JTextArea logsender;
+    public static JTextArea logreceiver;
     JFileChooser fileChooser;
     JFileChooser folderChooser;
     JTabbedPane tabbedPane;
@@ -72,7 +73,6 @@ public class AISSInterface extends
     private boolean timestamp = false;
     private String emailDir;
     private String emailDirReceiver;
-    
 
     public AISSInterface() {
         super(new BorderLayout());
@@ -110,7 +110,7 @@ public class AISSInterface extends
         
         ///////// BUTTONS
         // Create the openToSendButton. 
-        openToSendButton = new JButton("Open Folder to Send");
+        openToSendButton = new JButton("Load Folder to Send");
         openToSendButton.addActionListener(this);
         // Create the openReceivedButton
         openReceivedButton = new JButton("Open Received Email");
@@ -134,6 +134,9 @@ public class AISSInterface extends
         /////////// HOME PANEL
         // homePanel is the welcome page
         homePanel = new JPanel();
+        JLabel label = new JLabel();
+        label.setText("<html><p align=center></p><p align=center></p><p align=center></p><p align=center>AISS</p><p align=center>Security</p><p align=center>Email</p><p align=center>Service</p><p align=center></p><p align=center></p><p align=center>Grupo 2</p><p align=center></p></html>");
+        homePanel.add(label);
         ////////////
         
         /////// SENDER PANEL CONTAINS.....
@@ -192,9 +195,9 @@ public class AISSInterface extends
               if(index == 0){
             	  maininfo.setText("Welcome to AISS Security Email Service.\nPlease select your action below.");
               } else if (index == 1){
-            	  maininfo.setText("SENDER\nClick on Open to load the directory where you have your mail files.\nChoose your options.\nClick on Save to save the protect file to disk.");
+            	  maininfo.setText("Click on 'Load folder to Send' to load the directory where you have your mail files.\nChoose your options.\nClick on 'Save' to save the protected file to disk.\nNote: The file has to have .aiss estension, for exemple, sample.aiss.");
               } else {
-            	  maininfo.setText("RECEIVER\nClick on Open to load the protected file.\nCheck output information.\nClick on Save button to save original mail files to disk.");
+            	  maininfo.setText("Click on 'Open Received Email' to load the protected file (.aiss).\nClick on 'Run and Save' button to run security process and save original mail files to disk.");
               }
               //maininfo.setText("Tab changed to: " + sourceTabbedPane.getTitleAt(index));
             }
@@ -264,6 +267,7 @@ public class AISSInterface extends
         
         // Handle SAVE sender - HERE IS THE REAL ACTION IN SENDER
         } else if (e.getSource() == saveSenderButton){
+        	logsender.append("Running....\n");
         	// save the file
         	int returnVal = fileChooser.showSaveDialog(AISSInterface.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -291,16 +295,17 @@ public class AISSInterface extends
     	} else if (e.getSource() == openReceivedButton) {
             int returnVal = fileChooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-            	logreceiver.append("Opening..." + newline);
+            	logreceiver.append("OPEN - Opening..." + newline);
             	File file = fileChooser.getSelectedFile();
             	emailDirReceiver = file.getPath();
-                logreceiver.append("Opened: " + emailDirReceiver + "." + newline);
+                logreceiver.append("OPEN - " + emailDirReceiver + " was opened with success." + newline);
             } else {
-                logreceiver.append("Open command cancelled by user." + newline);
+                logreceiver.append("OPEN - command cancelled by user." + newline);
             }
         	
         // Handle SAVE receiver
         } else if (e.getSource() == saveReceiverButton){
+        	logreceiver.append("Running....\n");
         	// save the file
         	int returnVal = folderChooser.showSaveDialog(AISSInterface.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -309,26 +314,17 @@ public class AISSInterface extends
             	// receiver
             	try {
 					Receiver.begin(emailDirReceiver, dirToSave);
-					logreceiver.append("SAVE: content was saved to " + dirToSave + "with success." + newline);
+					logreceiver.append("SAVE - content was saved to " + dirToSave + " with success." + newline);
 				} catch (Exception e1) {
 					logreceiver.append("SAVE - ERROR: operation was not concluded and file was not saved: " + e1 + newline);
 				}
-                }
-            } else {
-                logreceiver.append("Save command cancelled by user." + newline);
-         } 
-    }
-    
-    /** Returns an ImageIcon, or null if the path was invalid. */
-    protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = AISSInterface.class.getResource(path);
-        if (imgURL != null) {
-            return new ImageIcon(imgURL);
-        } else {
-            System.err.println("Couldn't find file: " + path);
-            return null;
+            }
+            else {
+                logreceiver.append("RUN AND SAVE - command cancelled by user." + newline);
+         }
         }
     }
+    
     
     public void appendLogReceiver(String text){
     	logreceiver.append(text);

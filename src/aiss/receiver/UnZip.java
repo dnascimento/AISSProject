@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import aiss.interf.AISSInterface;
+
 public class UnZip {
     List<String> fileList;
 
@@ -31,6 +33,7 @@ public class UnZip {
                 String fileName = ze.getName();
                 File newFile = new File(outDirectory, fileName);
                 System.out.println("file unzip : " + newFile.getAbsoluteFile());
+                AISSInterface.logreceiver.append("UNZIP - file unzipped: " + newFile.getAbsolutePath() + "\n");
                 // create all non exists folders
                 // else you will hit FileNotFoundException for compressed folder
                 new File(newFile.getParent()).mkdirs();
