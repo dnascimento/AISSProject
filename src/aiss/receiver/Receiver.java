@@ -51,18 +51,8 @@ public class Receiver {
      * @param: signed cipher timestamp mailFile outputEmailText <outputZipDirectory>
      * @throws Exception
      */
-    public static void main(String[] args) throws Exception {
-        args = new String[] { "thunderbox/transferBox/email.out", "thunderbox/outbox/" };
-
-        String inputMailObject;
-        String outMainDirectoryPath;
-        try {
-            inputMailObject = args[0];
-            outMainDirectoryPath = args[1];
-        } catch (Exception e) {
-            throw new Exception("Wrong parameters");
-        }
-
+    public static void begin(String inputMailObject, String outMainDirectoryPath) throws Exception {
+        
         // Ler o objecto
         File inputMailFile = new File(inputMailObject);
         BufferedReader in = new BufferedReader(new FileReader(inputMailFile));

@@ -32,25 +32,8 @@ public class Sender {
     /**
      * Main method
      */
-    public static void main(String[] args) throws Exception {
-        boolean sign;
-        boolean encrypt;
-        boolean timestamp;
-        String emailInputDir;
-        String outputFile;
-
-        args = new String[] { "False", "True", "False", "thunderbox/inbox",
-                "thunderbox/transferBox/email.out" };
-
-        try {
-            sign = Boolean.parseBoolean(args[0]);
-            encrypt = Boolean.parseBoolean(args[1]);
-            timestamp = Boolean.parseBoolean(args[2]);
-            emailInputDir = args[3];
-            outputFile = args[4];
-        } catch (Exception e) {
-            throw new Exception("Wrong parameters");
-        }
+    public static void begin(boolean sign, boolean encrypt, boolean timestamp, String emailInputDir, String outputFile) 
+    throws Exception {
 
         // //////////////////// ZIP FILES IF EXISTS ////////////////////////////////
         File arquivoZip = null;
