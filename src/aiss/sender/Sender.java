@@ -43,13 +43,7 @@ public class Sender {
             throw new Exception(
                     "Input must be a directory containing at least a 'email.txt' file");
         }
-        String[] filesNamesToZip = inputDir.list();
-        File filesToZip[] = new File[filesNamesToZip.length];
-        int k = 0;
-        for (String filename : filesNamesToZip) {
-            filesToZip[k++] = new File(inputDir, filename);
-        }
-        arquivoZip = zipfiles(filesToZip, ZIP_TEMP_FILE);
+        arquivoZip = zipfiles(inputDir, ZIP_TEMP_FILE);
 
         // ////////////////// END-ZIP ////////////////////////////////
 
@@ -103,8 +97,8 @@ public class Sender {
         }
     }
 
-    private static File zipfiles(File[] arquivos, String outputZip) throws Exception {
-        new AppZip(arquivos, outputZip);
+    private static File zipfiles(File dir, String outputZip) throws Exception {
+        new AppZip(dir, outputZip);
         return new File(outputZip);
     }
 

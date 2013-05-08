@@ -19,33 +19,17 @@ public class AppZip {
     public String sourceFolder;
     public String outputFile;
 
-    public AppZip(File[] archives, String outputFile) throws Exception {
+    public AppZip(File dir, String outputFile) throws Exception {
         fileList = new ArrayList<String>();
         this.outputFile = outputFile;
-
-        File tmpDirectory = new File(TEMP_SOURCE_DIRECTORY);
-        sourceFolder = tmpDirectory.getAbsolutePath();
-        moveToTempFolder(tmpDirectory, archives);
-        generateFileList(tmpDirectory);
+        sourceFolder = dir.getAbsolutePath();
+        generateFileList(dir);
         zipIt(outputFile);
-        FileUtils.deleteDirectory(tmpDirectory);
     }
 
 
 
-    private void moveToTempFolder(File tmpDirectory, File[] archives) throws Exception {
-        if (tmpDirectory.exists()) {
-            throw new Exception("Temp zip directory already exists");
-        }
-        tmpDirectory.mkdirs();
-        if (!tmpDirectory.exists()) {
-            throw new Exception("Can not create a zip temp dir");
-        }
-        for (int i = 0; i < archives.length; i++) {
-            archives[i].renameTo(new File(tmpDirectory.getAbsolutePath() + File.separator
-                    + archives[i].getName()));
-        }
-    }
+
 
     /**
      * Zip it

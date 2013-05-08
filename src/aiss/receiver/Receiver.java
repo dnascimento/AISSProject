@@ -16,6 +16,7 @@ import java.util.List;
 
 import aiss.AesBox;
 import aiss.AissMime;
+import aiss.interf.AISSInterface;
 import aiss.shared.AISSUtils;
 import aiss.shared.ConfC;
 import aiss.shared.Mode;
@@ -58,6 +59,7 @@ public class Receiver {
         BufferedReader in = new BufferedReader(new FileReader(inputMailFile));
         StringBuilder sb = new StringBuilder();
         String line = in.readLine();
+        AISSInterface aiss = new AISSInterface();
 
         while (line != null) {
             sb.append(line);
@@ -72,17 +74,22 @@ public class Receiver {
 
         // Decifrar os dados
         if (mimeObj.ciphered) {
-            System.out.println("Decipher");
+            System.out.println("DECIPHER - Starting Decipher...");
+            aiss.appendLogReceiver("DECIPHER - Starting Decipher...");
             byte[] data = decipherAES(mimeObj.data);
             mimeObj = (AissMime) AISSUtils.ByteArrayToObject(data);
+            System.out.println("DECIPHER - Success.");
+            aiss.appendLogReceiver("DECIPHER - Success.");
         }
 
 
 
         // Checktimestamp sign
         if (mimeObj.timestamp != null) {
-            Date timestampDate = checkTimeStampSignature(mimeObj.data, mimeObj.timestamp);
-            System.out.println("Timestamp Sign: " + timestampDate);
+        	aiss.appendLogReceiver("TIMESTAMP - Starting TimeStamp Check...");
+        	Date timestampDate = checkTimeStampSignature(mimeObj.data, mimeObj.timestamp);
+        	aiss.appendLogReceiver("TIMESTAMP - TimeStamp Sign: " + timestampDate);
+        	System.out.println("TIMESTAMP - Timestamp Sign: " + timestampDate);
         }
 
 
@@ -126,6 +133,8 @@ public class Receiver {
          * -> attachments folder - status.txt -> timestampSigned? authorSigned?
          */
     }
+    
+    
 
     /**
      * Check Portuguse Citzan Card digital signature
@@ -158,7 +167,12 @@ public class Receiver {
 
     public static byte[] decipherAES(byte[] data) throws Exception {
         AesBox box = new AesBox();
-        box.init(Mode.Decipher);
+        try{
+        box.init(Mode.Decipher);}
+        catch(Exception e){
+        	System.out.println("decipherAES: error with AesBox.");
+        	throw new Exception("decipherAES: error with AesBox.");
+        }
         return box.doFinal(data);
         // Cipher cipher = Cipher.getInstance(ConfC.AES_CIPHER_TYPE);
         // byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };

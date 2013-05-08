@@ -70,7 +70,8 @@ public class AISSInterface extends
     private boolean sign = false;
     private boolean cipher = false;
     private boolean timestamp = false;
-    private String emailDir = "";
+    private String emailDir;
+    private String emailDirReceiver;
     
 
     public AISSInterface() {
@@ -120,7 +121,7 @@ public class AISSInterface extends
         saveSenderButton.addActionListener(this);
         saveSenderButton.setPreferredSize(new Dimension(120,60));
         // save button for sender
-        saveReceiverButton = new JButton("Save");
+        saveReceiverButton = new JButton("Run and Save");
         saveReceiverButton.addActionListener(this);
 
         ////// TOP PANEL CONTAINS MAIN INFO TEXT
@@ -272,12 +273,12 @@ public class AISSInterface extends
                 	// Do the job
                 	try {
 						Sender.begin(sign, cipher, timestamp, emailDir, path);
+						// log
+	                	logsender.append("SAVE: the file " + path + " was sucessefully saved." + newline);
 					} catch (Exception e1) {
 						// erro
-						logsender.append("SAVE - ERROR: operation was not concluded and file was not saved: " + e1);
+						logsender.append("SAVE - ERROR: operation was not concluded and file was not saved: " + e1 + newline);
 					}
-                	// log
-                	logsender.append("SAVE: the file " + path + " was sucessefully saved." + newline);
                 }else{
                 	logsender.append("SAVE: File not saved. Please choose an .aiss extension name, for example, mail.aiss");
                 }
@@ -288,17 +289,15 @@ public class AISSInterface extends
         /////////// RECEIVER SIDE    
         // Handle (open receiver) button action.
     	} else if (e.getSource() == openReceivedButton) {
-            int returnVal = fileChooser.showSaveDialog(this);
+            int returnVal = fileChooser.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
             	logreceiver.append("Opening..." + newline);
-            	File file = folderChooser.getCurrentDirectory();
-            	emailDir = file.getPath();
-                logreceiver.append("Opened: " + emailDir + "." + newline);
-                // begin of cipher or assigned or verify TS
+            	File file = fileChooser.getSelectedFile();
+            	emailDirReceiver = file.getPath();
+                logreceiver.append("Opened: " + emailDirReceiver + "." + newline);
             } else {
                 logreceiver.append("Open command cancelled by user." + newline);
             }
-            log.setCaretPosition(log.getDocument().getLength());
         	
         // Handle SAVE receiver
         } else if (e.getSource() == saveReceiverButton){
@@ -306,13 +305,17 @@ public class AISSInterface extends
         	int returnVal = folderChooser.showSaveDialog(AISSInterface.this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
             	File file = folderChooser.getCurrentDirectory();
-            	emailDir = file.getPath();
+            	String dirToSave = file.getPath();
             	// receiver
-            	// Receiver.begin(, emailDir);
-            	logsender.append("SAVE: content was saved to " + emailDir + "with success." + newline);
+            	try {
+					Receiver.begin(emailDirReceiver, dirToSave);
+					logreceiver.append("SAVE: content was saved to " + dirToSave + "with success." + newline);
+				} catch (Exception e1) {
+					logreceiver.append("SAVE - ERROR: operation was not concluded and file was not saved: " + e1 + newline);
+				}
                 }
             } else {
-                logsender.append("Save command cancelled by user." + newline);
+                logreceiver.append("Save command cancelled by user." + newline);
          } 
     }
     
@@ -325,6 +328,10 @@ public class AISSInterface extends
             System.err.println("Couldn't find file: " + path);
             return null;
         }
+    }
+    
+    public void appendLogReceiver(String text){
+    	logreceiver.append(text);
     }
 
     /**
