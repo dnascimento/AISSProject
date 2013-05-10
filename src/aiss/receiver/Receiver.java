@@ -1,9 +1,9 @@
 package aiss.receiver;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.security.Key;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+
 import aiss.AesBox;
 import aiss.AissMime;
 import aiss.interf.AISSInterface;
@@ -21,8 +23,6 @@ import aiss.shared.AISSUtils;
 import aiss.shared.ConfC;
 import aiss.shared.Mode;
 import aiss.timestampServer.TimestampObject;
-
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 
 /**
@@ -39,6 +39,7 @@ public class Receiver {
             true, false, false, false, false };
     private static final boolean[] SIGN_CERT_KEY_USAGE = { false, true, false, false,
             false, false, false, false, false };
+    private static final int BUFFER_SIZE = 20000;
 
     private static List<X509Certificate> caCertificateList = new ArrayList<X509Certificate>();
     private static String AUTH_CERT_SN = "7196419480743688086";
@@ -53,28 +54,29 @@ public class Receiver {
      * @throws Exception
      */
     public static void begin(String inputMailObject, String outMainDirectoryPath) throws Exception {
-        
+
         // Ler o objecto
         File inputMailFile = new File(inputMailObject);
-        BufferedReader in = new BufferedReader(new FileReader(inputMailFile));
-        StringBuilder sb = new StringBuilder();
-        String line = in.readLine();
-
-        while (line != null) {
-            sb.append(line);
-            sb.append("\n");
-            line = in.readLine();
+        Base64InputStream in = new Base64InputStream(new FileInputStream(inputMailFile));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[BUFFER_SIZE];
+        int bytesRead = in.read(buf);
+        while (bytesRead != -1) {
+            baos.write(buf, 0, bytesRead);
+            bytesRead = in.read(buf);
         }
-        String contentread = sb.toString();
+        baos.flush();
         in.close();
-        byte[] content = Base64.decode(contentread);
+        byte[] content = baos.toByteArray();
+        baos.close();
+
         AissMime mimeObj = (AissMime) AISSUtils.ByteArrayToObject(content);
 
 
         // Decifrar os dados
         if (mimeObj.ciphered) {
             System.out.println("DECIPHER - Starting Decipher...\n");
-            AISSInterface.logreceiver.append("DECIPHER- Starting decipher...\n" );
+            AISSInterface.logreceiver.append("DECIPHER- Starting decipher...\n");
             byte[] data = decipherAES(mimeObj.data);
             mimeObj = (AissMime) AISSUtils.ByteArrayToObject(data);
             System.out.println("DECIPHER - Success.");
@@ -85,17 +87,18 @@ public class Receiver {
 
         // Checktimestamp sign
         if (mimeObj.timestamp != null) {
-        	AISSInterface.logreceiver.append("TIMESTAMP - Starting timestamp verification...\n" );
-        	Date timestampDate = checkTimeStampSignature(mimeObj.data, mimeObj.timestamp);
-        	AISSInterface.logreceiver.append("TIMESTAMP - Timestamp Sign: " + timestampDate + "\n");
-        	System.out.println("TIMESTAMP - Timestamp Sign: " + timestampDate);
+            AISSInterface.logreceiver.append("TIMESTAMP - Starting timestamp verification...\n");
+            Date timestampDate = checkTimeStampSignature(mimeObj.data, mimeObj.timestamp);
+            AISSInterface.logreceiver.append("TIMESTAMP - Timestamp Sign: "
+                    + timestampDate + "\n");
+            System.out.println("TIMESTAMP - Timestamp Sign: " + timestampDate);
         }
 
 
 
         // Sacar a assinatura
         if (mimeObj.signature != null) {
-        	AISSInterface.logreceiver.append("SIGN - Starting signature verification...\n" );
+            AISSInterface.logreceiver.append("SIGN - Starting signature verification...\n");
             if (mimeObj.certificate == null) {
                 throw new Exception("Mail without certificate");
             }
@@ -104,13 +107,14 @@ public class Receiver {
                                               mimeObj.certificate);
             if (isSigned) {
                 System.out.println("Assinatura v‡lida");
-                AISSInterface.logreceiver.append("SIGN - Signature is valid.\n" );
+                AISSInterface.logreceiver.append("SIGN - Signature is valid.\n");
                 System.out.println("This email is sign by: "
                         + extractCertificateOwner(mimeObj.certificate));
-                AISSInterface.logreceiver.append("SIGN - This email is signed by " + extractCertificateOwner(mimeObj.certificate) + "\n");
+                AISSInterface.logreceiver.append("SIGN - This email is signed by "
+                        + extractCertificateOwner(mimeObj.certificate) + "\n");
             } else {
                 System.out.println("Assinatura inv‡lida");
-                AISSInterface.logreceiver.append("SIGN - ATTENTION: Signature is NOT valid.\n" );
+                AISSInterface.logreceiver.append("SIGN - ATTENTION: Signature is NOT valid.\n");
             }
         }
 
@@ -126,7 +130,7 @@ public class Receiver {
 
         // Unzip do conteudo para dentro da pasta
 
-        //inputMailFile.delete();
+        // inputMailFile.delete();
         System.out.println("Receiver done (all work)");
         // TODO escrever o log de resultado
         /**
@@ -134,8 +138,8 @@ public class Receiver {
          * -> attachments folder - status.txt -> timestampSigned? authorSigned?
          */
     }
-    
-    
+
+
 
     /**
      * Check Portuguse Citzan Card digital signature

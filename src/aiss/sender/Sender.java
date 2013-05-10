@@ -1,14 +1,15 @@
 package aiss.sender;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.Key;
 import java.security.cert.X509Certificate;
+
+import org.apache.commons.codec.binary.Base64OutputStream;
 
 import aiss.AesBox;
 import aiss.AissMime;
@@ -18,8 +19,6 @@ import aiss.shared.CCConnection;
 import aiss.shared.ConfC;
 import aiss.shared.Mode;
 import aiss.timestampServer.TimestampObject;
-
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 
 /**
@@ -33,15 +32,19 @@ public class Sender {
     /**
      * Main method
      */
-    public static void begin(boolean sign, boolean encrypt, boolean timestamp, String emailInputDir, String outputFile) 
-    throws Exception {
+    public static void begin(
+            boolean sign,
+                boolean encrypt,
+                boolean timestamp,
+                String emailInputDir,
+                String outputFile) throws Exception {
 
         // //////////////////// ZIP FILES IF EXISTS ////////////////////////////////
         File arquivoZip = null;
         File inputDir = new File(emailInputDir);
 
         if (!inputDir.isDirectory() || inputDir.list().length == 0) {
-        	AISSInterface.logsender.append("LOAD - Input must be a directory containing at least one file\n");
+            AISSInterface.logsender.append("LOAD - Input must be a directory containing at least one file\n");
             return;
         }
         arquivoZip = zipfiles(inputDir, ZIP_TEMP_FILE);
@@ -61,7 +64,7 @@ public class Sender {
         // Assinar
         if (sign) {
             System.out.println("Sign");
-        	AISSInterface.logsender.append("SIGN - signing...\n");
+            AISSInterface.logsender.append("SIGN - signing...\n");
             mimeObject.signature = signDataUsingCC(mimeObject.data);
             mimeObject.certificate = getCCCertificate();
             AISSInterface.logsender.append("SIGN - success.\n");
@@ -90,22 +93,24 @@ public class Sender {
 
 
         // Base64 para guardar
-        byte[] objBytes = AISSUtils.ObjectToByteArray(mimeObject);
-        String objString = Base64.encode(objBytes);
-        // escreve em ficheiro de texto o objString
-        BufferedWriter out = new BufferedWriter(new FileWriter(outputFile));
-        // PrintWriter out = new PrintWriter(outputFile);
-        out.write(objString);
-        out.close();
-        
+        SaveObjectToFile(outputFile, mimeObject);
+
         // invoke thunderbird with attachment added
         openThunderbird(new File(outputFile).getAbsolutePath());
-        
+
         System.out.println("Done");
         // Clean temp fiz
         if (arquivoZip != null) {
             arquivoZip.delete();
         }
+    }
+
+
+    private static void SaveObjectToFile(String file, Object obj) throws Exception {
+        // Base64 para guardar
+        FileOutputStream output = new FileOutputStream(new File(file));
+        Base64OutputStream stream = new Base64OutputStream(output);
+        stream.write(AISSUtils.ObjectToByteArray(obj));
     }
 
     private static File zipfiles(File dir, String outputZip) throws Exception {
@@ -166,13 +171,14 @@ public class Sender {
             throw new Exception("Invalid Key type");
         }
     }
-    
-    public static void openThunderbird(String file){
-    	Runtime rt = Runtime.getRuntime();
-    	try {
-			Process pr = rt.exec(new String[] {"open","/Applications/Thunderbird.app","--args","-compose","attachment="+file});
-		} catch (IOException e) {
-			AISSInterface.logsender.append("Thunderbird was not found in your system.\n");
-		}
+
+    public static void openThunderbird(String file) {
+        Runtime rt = Runtime.getRuntime();
+        try {
+            Process pr = rt.exec(new String[] { "open", "/Applications/Thunderbird.app",
+                    "--args", "-compose", "attachment=" + file });
+        } catch (IOException e) {
+            AISSInterface.logsender.append("Thunderbird was not found in your system.\n");
+        }
     }
 }
