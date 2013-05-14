@@ -1,0 +1,64 @@
+%====================================================================================	
+\section{System architecture}
+
+\begin{frame}{System architecture}
+\vspace{-0.9cm}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.4\textwidth]{./images/architecture.pdf}	
+ 	\caption{System Architecture architecture.}
+	\label{fig:}
+\end{figure}
+
+\end{frame}
+
+
+%====================================================================================	
+\begin{frame}{AISS Secure Mail \\ \small Zipping}
+
+\begin{itemize}
+\item All files and folder inside a directory are zipped;
+\item Support any file size
+\item Single file output
+\end{itemize}		
+\end{frame}
+
+
+\begin{frame}{AISS Secure Mail \\ \small Citzen Card Signature}
+\begin{itemize}
+\item PKCS#11 Portuguese Citizen Card
+\item SHA-1, RSA
+\end{itemize}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{./images/certificate.pdf}	
+ 	\caption{Certificate Tree}
+	\label{fig:}
+\end{figure}
+
+\end{frame}
+
+
+\begin{frame}{AISS Secure Mail \\ \small Secure Timestamp}
+\begin{itemize}
+\item Remote Rasperry Pi Server;
+\item Self signed RSA Keys;
+\item SHA-256;
+\item Retrieve hash from User and sign it
+\item Output: Kp(H(m),T),T
+\end{itemize}		
+\end{frame}
+
+
+\begin{frame}{AISS Secure Mail \\ \small Cipher}
+Cipher using ethernet box:
+\begin{itemize}
+\item JNI + C Connection;
+\item Block update;
+\item All data in memory;
+\end{itemize}			
+\end{frame}
+
+
+
+

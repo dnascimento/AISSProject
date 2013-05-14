@@ -1,0 +1,117 @@
+\documentclass[12pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usefonttheme{structurebold}
+
+\usepackage{eurosym}
+
+\usepackage{hyperref}
+\usepackage{listings}
+
+\usepackage{color}
+\definecolor{gray}{rgb}{0.4,0.4,0.4}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\lstset{
+  tabsize=3,
+  basicstyle=\ttfamily,
+  columns=fullflexible,
+  showstringspaces=false,
+  commentstyle=\color{gray}\upshape 
+}
+
+\usepackage{caption}
+\captionsetup{font=scriptsize,labelfont=scriptsize}
+\setbeamertemplate{caption}[numbered]
+
+
+
+\definecolor{istblue}{RGB}{0,157,224}
+\definecolor{istgrey}{RGB}{70,85,95}
+\definecolor{almostwhite}{RGB}{240,240,240}
+
+\setbeamercolor{block title}{use=structure,fg=white,bg=istblue}
+\setbeamercolor{block body}{parent=normal text,use=block title,bg=almostwhite}
+
+
+\setbeamercolor{structure}{bg=white, fg=istblue}
+\setbeamercolor{palette sidebar primary}{fg=istgrey}
+\setbeamercolor{frametitle}{fg=istgrey}
+\setbeamercolor{title}{fg=istblue}
+
+
+\setbeamercolor{headfootlinecolor}{fg=black,bg=istblue}
+
+\setbeamertemplate{footline}{%
+  \begin{beamercolorbox}[sep=1em,wd=\paperwidth,leftskip=0.5cm,rightskip=0.5cm]{headfootlinecolor}{\textcolor{white}{} \hspace*{\fill} \textcolor{white}{AISS Secure Mail}}
+   \end{beamercolorbox}%
+}
+
+\useoutertheme{sidebar}
+\useinnertheme{circles}
+\setbeamertemplate{itemize items}[circles]
+
+\setbeamertemplate{blocks}[rounded][shadow=true]
+
+
+\title[]{\usebeamercolor[bg]{white}AISS Secure Mail}
+\author[]{\usebeamercolor[bg]{white}Gonçalo Carito \\ \scriptsize Instituto Superior Técnico \\
+\normalsize Dário Nascimento \\ \scriptsize Instituto Superior Técnico
+}
+\institute[IST]{\usebeamercolor[bg]{white}Applications and Implementations of Security Systems\\}
+\logo{\includegraphics[scale=.02]{images/istlogo}}
+
+
+\AtBeginSection[]
+{
+\begin{frame}{Outline}
+\tableofcontents[currentsection]
+\end{frame}
+}
+
+\setbeamertemplate{frametitle continuation}{(\insertcontinuationcount)}
+
+
+\begin{document}
+\defbeamertemplate*{title page}{customized}[1][]
+{
+  \usebeamerfont{title}\usebeamercolor[fg]{almostwhite}\inserttitle\par
+  \usebeamerfont{subtitle}\usebeamercolor[fg]{almostwhite}\insertsubtitle\par 
+  \bigskip
+  \usebeamerfont{author}\insertauthor\par
+  \bigskip
+  \usebeamerfont{institute}\insertinstitute\par
+  \usebeamerfont{date}\today\par
+}
+
+
+\begingroup
+\setbeamercolor{background canvas}{bg=istblue}
+%\makeatletter
+%%\setlength{\hoffset}{-.5\beamer@sidebarwidth}
+%\makeatother
+
+\hspace{-35pt}
+\begin{frame}[plain]
+
+	\centering
+    \titlepage
+    \begin{figure}
+    \begin{center}
+        \includegraphics[scale=0.3]{images/istlogoazul}
+    \end{center}
+    \end{figure}
+\end{frame}
+\endgroup
+
+
+\begin{frame}{Outline}
+	\tableofcontents
+\end{frame}
+
+
+\input{./chapters/overview}
+\input{./chapters/architecture}
+\input{./chapters/results}
+\input{./chapters/conclusion}
+
