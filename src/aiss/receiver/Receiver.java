@@ -124,10 +124,10 @@ public class Receiver {
             throw new Exception("Output directory doesnt exists");
         }
 
-        File outDirectory = generateNewDirectory(outMainDirectory);
+        // File outDirectory = generateNewDirectory(outMainDirectory);
         System.out.println("generate directory");
         UnZip unZip = new UnZip();
-        unZip.unZipIt(mimeObj.data, outDirectory);
+        unZip.unZipIt(mimeObj.data, outMainDirectory);
 
         // Unzip do conteudo para dentro da pasta
 

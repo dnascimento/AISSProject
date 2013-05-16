@@ -1,7 +1,0 @@
-///////////////////////////////////////
-AISS:
-GRUPO:
-Gonçalo Carito
-Dário Nascimento
-///////////////////////
-Executar usando: ./aissSecureMail.sh

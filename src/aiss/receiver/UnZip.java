@@ -33,7 +33,6 @@ public class UnZip {
                 String fileName = ze.getName();
                 File newFile = new File(outDirectory, fileName);
                 System.out.println("file unzip : " + newFile.getAbsoluteFile());
-                AISSInterface.logreceiver.append("UNZIP - file unzipped: " + newFile.getAbsolutePath() + "\n");
                 // create all non exists folders
                 // else you will hit FileNotFoundException for compressed folder
                 new File(newFile.getParent()).mkdirs();
@@ -49,6 +48,8 @@ public class UnZip {
             }
             zis.closeEntry();
             zis.close();
+            AISSInterface.logreceiver.append("UNZIP - Data unzipped: "
+                    + outDirectory.getAbsolutePath() + "\n");
             System.out.println("Done");
         } catch (IOException ex) {
             ex.printStackTrace();
