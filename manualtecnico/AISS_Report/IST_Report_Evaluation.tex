@@ -1,0 +1,35 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                            %
+%     File: IST_Report_Evaluation.tex                                    %
+%                                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% !TEX root = IST_Report.tex
+\newpage
+\chapter{Avaliação}
+\label{chapter:evaluation}
+De modo a confirmar a segurança do nosso sistema, adulteramos as mensagens e 
+assinaturas realizadas. Confirmarmos que o sistema detecta corretamente a adulteração de mensagens. 
+\\
+Foram realizados vários testes de desempenho do sistema utilizando um computador de utilizador comum MacBook Pro com processador 2.9 GHz Intel Core i7, memória 8 GB 1600 MHz DDR3 e sistema operativo MacOsX 10.8.3 e disco SSD (evidênciado na latência de escrita em disco) O servidor de timestamp foi executado localmente pelo que não são considerados atrasos na rede.\\
+Foram realizadas 5 amostras por cada caso e determinados os níveis de confiança a 95\% para os tempos obtidos. O directório enviado é constituído por  286 ficheiros PDF e Word que totalizam 100MBytes. \\
+\begin{itemize}
+  \item \textbf{Compressão: }A compressão do ficheiro converte 100MB em 95.5MB. Esta taxa depende do formato e contéudo dos ficheiros de origem. Demorou em média 4484 com desvio padrão de 30ms. \\
+  \item \textbf{Hashing do ficheiro: } A realização do hash do ficheiro comprimido para utilizar nas assinaturas demora em média 700ms com desvio padrão de 10ms.\\
+  \item \textbf{Assinatura com cartão de cidadão: }A assinatura com cartão de cidadão demorou 936ms com desvio padrão de 24ms. 
+ \item \textbf{Timestamp: }O serviço de timestamp demora 70ms a decorrer com desvio padrão de 5ms.\\
+\item \textbf{Codificação e escrita em disco: }A conversão para base 64 e escrita em disco demorou 1335ms com desvio padrão de 35ms. A codificação de base 64 implica um aumento da dimensão do ficheiro ao factor de 8/6 pelo que o ficheiro final tem 130.7MB.
+\item  \textbf{Descompressão e escrita em disco}A descompressão demorou 1380ms com desvio padrão 32ms.\\
+\item \textbf{Verificação timestamp: }A verificação do timestamp demorou 32ms com desvio padrão de 6ms.
+\item  \textbf{Verificação Assinatura: } 6ms, desvio de 3ms.\\
+\item \textbf{Cifra e Decifra: } A especificação técnica da caixa fornecida pelo 
+cliente indica 60 segundos para cada 100MB pelo que assumimos este valor na 
+ausência da possibilidade de realização de testes experimentais.
+\end{itemize}
+No total o processo de envio demora (excluindo a cifra) 6 segundos enquanto que 
+a decifra demora 3 segundos. Estes valores não são significativos para a 
+experiência do utilizador quando comparados com o tempo de inserção do PIN do 
+cartão de cidadão e da cifra pela caixa fornecida pelo cliente.\\
+A excelente performance do nosso sistema deve-se em parte ao facto de os dados só serem lidos e escritos uma única vez no disco. 
+O reduzido numero de acessos a disco reduz o atraso do processo. Por outro lado implica a utilização de mais memória RAM do utilizador. Este processo teve um pico de utilização máxima de memória de 300MB. Consideramos que este custo não é significativo dadas as especificações atuais dos computadores para utilizador final. Caso o utilizador tenha menos memória, a solução é aplicável mas  para ficheiros de menores dimensões.\\
+A análise de performance concluí portanto que a nossa solução é eficiente.\\
+
