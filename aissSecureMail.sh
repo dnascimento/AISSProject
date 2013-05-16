@@ -1,2 +1,2 @@
 #!/bin/sh
-java -Xmx500m -jar AISS.jar 
+java -Xmx700m -jar AISS.jar 
