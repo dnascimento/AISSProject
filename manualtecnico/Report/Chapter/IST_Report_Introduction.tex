@@ -6,20 +6,26 @@
 % !TEX root = IST_Report.tex
 \chapter{Introdução}
 \label{chapter:introduction}
-Este documento descreve a implementação de um Serviço de Emails Seguro. Esta implementação teve como premissa o pedido de um \textbf{cliente} de uma proposta de plugin que se adaptasse, preferencialmente, ao cliente de emails \textit{Mozilla Thunderbird} e que efectuasse as seguintes operações de segurança:
-\begin{itemize}
-\item Cifra/Decifra AES com chave gerada por caixa fornecida pelo Cliente
-\item Assinatura com Cartão de Cidadão da República Portuguesa
-\item Assinatura e Verificação de Timestamp Seguro
-\end{itemize}
-
-Desta forma o Serviço de Emails Seguro tem dois sujeitos:
+Este documento descreve a implementação de um Serviço de Emails Seguro. Esta implementação teve como premissa o pedido de um \textbf{cliente} para criar um plugin para o programa de emails \textit{Mozilla Thunderbird}. \\
+Este plugin tem de garantir a \textit{confidencialidade}, \textit{não repudiação}, \textit{autenticidade} e \textit{garantia 
+temporal} de uma mensagem trocada entre 2 utilizadores. Mais, a garantia de 
+confidêncialidade tem de ser realizada através da Cifra/Decifra AES por uma caixa fornecida pelo 
+Cliente. A \textit{não repudiação }tem de ser assegurada através da assinatura da 
+mensagem com o Cartão de Cidadão da República Portuguesa. A garantia temporal 
+não possuí quaisquer requisitos extra pelo utilizador, apenas deve atribuir e validar um Timestamp Seguro à mensagem.
+\\
+Desta forma o serviço a disponibilizar tem 2 sujeitos:
 \begin{itemize}
 \item Sender -  Tem como input uma pasta de dados que pode comprimir, cifrar, assinar e adicionar timestamp 
 e gera um output para ser enviado ao destinatário (por exemplo por email)
 \item Receiver - Tem como input o email seguro do sender que irá decifrar, verificar assinatura e timestamp 
 e descomprimir para receber o conteúdo original.
 \end{itemize}
+A solução apresentada cumpre os requisitos de segurança estabelecidos pelo 
+utilizador utilizando uma interface própria que gera um ficheiro que pode não só 
+ser enviado pelo cliente de email  \textit{Thunderbird} como por qualquer outro 
+sistema de transferência de texto ou dados.\\
+
 No \textbf{Capítulo~\ref{chapter:architecture}} é apresentada  a Arquitectura do Sistema constituido pelo módulo cliente onde são implementadas as funcionalidades de cifra, assinatura e compressão, e pelo servidor de timestamp seguro.\\
 No \textbf{Capítulo~\ref{chapter:conclusions}} são tiradas as conclusões sobre o trabalho efectuado.
 \newpage

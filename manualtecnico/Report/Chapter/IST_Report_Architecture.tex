@@ -39,11 +39,8 @@ Supondo que todas as opções foram seleccionadas é realizada a cadeia de acç�
 \label{fig:order}
 \end{figure}
 
-Os ficheiros seleccionados, são comprimidos num único. De seguida este ficheiro é assinado recorrendo ao Cartão de Cidadão e o seu \textit{hash} é enviado ao servidor de timestamp seguro. O servidor cria um par associando um instante temporal ao hash. Este par é assinado pelo servidor afim de garantir que o servidor recebeu o hash no instante que lhe foi associado. Este certificado de Timestamp é devolvido ao sender. Mais detalhes na Secção~\ref{section:timestamp}.\\ 
-
-Por fim, a assinatura de cartão de cidadão, o certificado de Timestamp e os dados são organizados numa estrutura e esta estrutura é cifrada. Os dados cifrados são colocados dentro de uma nova estrutura que descreve as operações realizadas e permite inverter o processo.\\
- Por fim, esta estrutura é codificada e escrita em disco em formato de ficheiro para que o Sender possa enviar. \\
- 
+Os ficheiros seleccionados, são comprimidos num único. De seguida este ficheiro é assinado recorrendo ao Cartão de Cidadão e o seu \textit{hash} é enviado ao servidor de timestamp seguro. O servidor cria um par associando um instante temporal ao hash. Este par é assinado pelo servidor afim de garantir que o servidor recebeu o hash naquele instante. Este certificado de Timestamp é devolvido ao sender.\\ 
+A assinatura de cartão de cidadão, o certificado de Timestamp e os dados são organizados numa estrutura e esta estrutura é cifrada. Os dados cifrados são colocados dentro de uma nova estrutura que descreve as operações realizadas e permite inverter o processo. A estrutura é então codificada e escrita em disco em formato de ficheiro para que o Sender possa enviar. \\
  
 Quando o Receiver recebe este ficheiro protegido efectua as operações pela ordem inversa, começando pela decifra, verificação da validade do Timestamp através do servidor, verificação a Assinatura e descomprimindo os dados.
 
