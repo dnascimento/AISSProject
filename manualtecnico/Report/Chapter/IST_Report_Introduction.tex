@@ -7,27 +7,27 @@
 \chapter{Introdução}
 \label{chapter:introduction}
 Este documento descreve a implementação de um Serviço de Emails Seguro. Esta implementação teve como premissa o pedido de um \textbf{cliente} para criar um plugin para o programa de emails \textit{Mozilla Thunderbird}. \\
-Este plugin tem de garantir a \textit{confidencialidade}, \textit{não repudiação}, \textit{autenticidade} e \textit{garantia 
-temporal} de uma mensagem trocada entre 2 utilizadores. Mais, a garantia de 
-confidêncialidade tem de ser realizada através da Cifra/Decifra AES por uma caixa fornecida pelo 
-Cliente. A \textit{não repudiação }tem de ser assegurada através da assinatura da 
-mensagem com o Cartão de Cidadão da República Portuguesa. A garantia temporal 
-não possuí quaisquer requisitos extra pelo utilizador, apenas deve atribuir e validar um Timestamp Seguro à mensagem.
+Este plugin teria que ter a possibilidade de garantir a \textbf{confidencialidade}, \textbf{não repudiação}, \textbf{autenticidade} e, como resultado de um requisito opcional por parte do Cliente, \textbf{garantia 
+temporal} de uma mensagem trocada entre 2 utilizadores. Além disso, a garantia de 
+\textit{confidencialidade} teria de ser realizada através da Cifra/Decifra AES por uma caixa fornecida pelo 
+Cliente e a \textit{não repudiação} teria de ser assegurada através da assinatura da 
+mensagem com o Cartão de Cidadão da República Portuguesa. O Cliente não exigiu quaisquer requísito extra em relação à \textit{garantia temporal}, apenas que deve atribuir e validar um Timestamp Seguro à mensagem, sendo tal como as restantes operações: Cifra e Assinatura, de caracter opcional aquando da realização da operação.
 \\
-Desta forma o serviço a disponibilizar tem 2 sujeitos:
+Desta forma identificámos, no serviço a disponibilizar,  2 sujeitos principais:
 \begin{itemize}
 \item Sender -  Tem como input uma pasta de dados que pode comprimir, cifrar, assinar e adicionar timestamp 
 e gera um output para ser enviado ao destinatário (por exemplo por email)
-\item Receiver - Tem como input o email seguro do sender que irá decifrar, verificar assinatura e timestamp 
+\item Receiver - Tem como input o email seguro do sender que irá decifrar, verificar assinatura, timestamp 
 e descomprimir para receber o conteúdo original.
 \end{itemize}
 A solução apresentada cumpre os requisitos de segurança estabelecidos pelo 
-utilizador utilizando uma interface própria que gera um ficheiro que pode não só 
+Cliente: utilizando uma interface própria que gera um ficheiro que pode não só 
 ser enviado pelo cliente de email  \textit{Thunderbird} como por qualquer outro 
 sistema de transferência de texto ou dados.\\
 
-No \textbf{Capítulo~\ref{chapter:architecture}} é apresentada  a Arquitectura do Sistema constituido pelo módulo cliente onde são implementadas as funcionalidades de cifra, assinatura e compressão, e pelo servidor de timestamp seguro.\\
-No \textbf{Capítulo~\ref{chapter:conclusions}} são tiradas as conclusões sobre o trabalho efectuado.
+No \textbf{Capítulo~\ref{chapter:architecture}} é apresentada  a Arquitectura do Sistema constituido pelo módulo cliente (Sender ou Receiver) onde são implementadas as funcionalidades de cifra, assinatura e compressão, e pelo servidor de timestamp seguro.\\
+No \textbf{Capítulo~\ref{chapter:evaluation}} é feita uma Avaliação à performance e desempenho do sistema, tendo em conta as várias operações e a sua contextualização em cenário real. \\
+No \textbf{Capítulo~\ref{chapter:conclusions}} são tiradas as conclusões sobre o trabalho efectuado e respectivas reflexões.
 \newpage
 
 

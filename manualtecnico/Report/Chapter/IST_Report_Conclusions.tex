@@ -4,34 +4,63 @@
 %                                                                      %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % !TEX root = IST_Report.tex
+\clearpage
 \newpage
+
 \chapter{Conclusão}
 \label{chapter:conclusions}
 
-Tendo em conta os principais desafios que foram apresentados no ínicio do trabalho como:
+O objectivo princiapal neste trabalho prendeu-se na garantia das características de segurança exigidas pelo Cliente, através dos seus requísitos funcionais, nomeadamente:
+\begin{itemize}
+\item Confidencialidade
+\item Autenticidade e Não-Repudiação
+\item Garantia Temporal
+\end{itemize}
+
+Ao efectuar a \textbf{cifra} de todo o conteúdo enviado pelo Sender, inserido previamente num objecto com metadados indicativos, garantimos a absoluta confidencialidade do conteúdo. A cifra ser realizada através do mecanismo de caixa, cria \textit{per si} a garantia de partilha de um segredo exclusivo, a chave simétrica, indicando que apenas quem tem a caixa cifra/decifra a mensagem. A nossa solução integra as invocações Java integradas no restante código com as em Linguagem C presentes na interface da caixa, permitindo assim uma boa utilização da mesma.\\
+Em fase de desenvolvimento do projecto, começamos por cifrar a totalidade da mensagem, o que apresentava problemas de memória - em particular na \textit{heap} do Java, limitando o tamanho da mensagem a ser cifrada. No entanto, na nossa solução final, efectuamos cifra bloco a bloco que anula os problemas de memória permitindo a cifra de mensagens com, por exemplo, anexos de elevada dimensão. \\
+\\
+A utilização do Cartão de Cidadão como mecanismo de garantia de \textbf{autenticidade} e \textbf{não-repudiação} revelou bastantes aspectos positivos.
+Não obstante o não-controlável facto de o Cartão de Cidadão ser roubado juntamente com o PIN, este apresenta-se com um mecanismo viável no que toca a mecanismos de assinatura.
+O certificado que utilizámos - Certificado de Autenticação - valida os requisitos necessários não tendo o problema dos contornos legais que existem com o Certificado de Assinatura Digital, reconhecido pelo Estado como um meio legal para assinar documentos, comportando-se - em termos de implementação - de forma similar.\\
+Apesar de a biblioteca do Cartão de Cidadão, \textit{ptlib}, não ser muito estável, não nos trouxe problemas pois serve apenas na ligação entre Cartão e Certificados com o computador, sendo que para toda a gestão, assinatura e validação do processo, a biblioteca utilizada foi a \textit{PKCS11} que é bastante estável.
+A não disponibilização da chave de cifra privada fora do Cartão de Cidadão invalida a sua manipulação mas não a sua utilização. Não obstante o facto de na nossa proposta de solução não existir necessidade de manipulação da mesma - é sempre um facto a reter. Na nossa solução, o certificado de chave pública do Cartão de Cidadão é enviado encapsulado no objecto final (se nos abstraírmos do facto de a mensagem poder ir cifrada ou não) que é enviado para o Receiver, juntamente com os metadados.\\
+\\
+A \textbf{garantia temporal} não foi um requisito obrigatório por parte do Cliente, nem a sua forma de implementação. A utilização de um servidor de timestamp revelou ser uma boa escolha pois permitiu testes de exclusividade à operação do mesmo (sem consideração de atrasos na rede).
+O servidor de timestamp é, também, uma entidade de confiança entre ambos os módulos: Sender e Receiver. Daí a opção de ser enviado o hash da mensagem para o servidor, de forma a que este garanta a data da altura da assinatura.
+Não é possivel, na nossa solução, garantir data de envio do próprio email. No entanto, dada a transversalidade do nosso serviço - ou seja, a possibilidade de envio de utilização do conteúdo protegido por outros serviços - a garantia da data sobre o próprio conteúdo aparenta ser uma mais-valia importante. \\
+\\
+Para além das características de segurança assinaladas existem, também, dois pontos a referir:
+\begin{itemize}
+\item Integridade
+\item Base 64
+\end{itemize}
+
+Apesar da \textbf{integridade} não ser, mesmo que indirectamente, um requisito do Cliente, o nosso sistema permite a garantia da mesma pois é utilizado o mecanismo de \textit{hash} de relevante importância em operações de segurança.
+O mesmo pode ser aplicado à utilização da \textbf{Base 64} que permite que não haja restrições nos serviços a utilizarem a nossa soluçaõ, caso o anexo com o ficheiro protegido seja, por exemplo, enviado como \textit{plaintext} como é o caso de alguns serviços de email que assim procedem.
+
+No ínicio do trabalho, identificámos alguns desafios como:
 \begin{itemize}
 \item Possíveis problemas de memória
-\item Assegurar eficiência nas operações
+\item Necessidade de assegurar eficiência nas operações
 \item Cartão de Cidadão com uma biblioteca instável
 \end{itemize}
-Mas também os principais objectivos, como:
+Tal como descrito ao longo desta conclusão, estes desafios forma ultrapassados aquando da necessidade de cumprir os requisitos principais de segurança.
+
+Para além dos principais objectivos, também foram identificados outros como:
 \begin{itemize}
 \item Ter uma interface user-friendly
 \item Ser um sistema compatível com aplicações que acedem a ficheiros
 \item Manter uma boa performance
 \end{itemize}
 
-Podemos concluir que os resultados obtidos foram muito adequados.
-A grande maioria dos problemas que poderiam vir a existir foram resolvidos. Naturalmente que haveria sempre melhorias a executar como tornar o Sistema compatível com outros Sistemas Operativos assim como ser mais flexível e menos condicional a interacção com outros Clientes de Email para além do Thunderbird.
+Para obtermos uma interface clean e de fácil utilização pelo cliente, integrada de forma natural com a \textit{core} do trabalho, foi optada a utilização da biblioteca gráfica \textit{swing} do Java.
+Como tal, foi concebida uma interface que permite uma boa ligação ao sistema de ficheiros, tornando-a facilmente interligável com outros programas de envio de ficheiros.
+De forma a cumprir e fornecer um serviço do mais possivel do agrado do Cliente, a aplicação apresenta por \textit{default} a anexação do ficheiro protegido a uma mensagem no \textit{Mozilla Thunderbird}. Trabalho futuro para permitir maior flexibilidade de escolha, passaria pela oferta de uma opção de interacção estrita com outros serviços como o \textit{Gmail}, \textit{Dropbox}, \textit{Google Drive} entre outros.
 
-Apesar de ser uma biblioteca instável e de haver o relato de alguns problemas de utilização com o Mac OS, a biblioteca do Cartão de Cidadão demonstrou um bom desempenho ao longo do tempo de desenvolvimento do projecto, raramente falhando.
-A utilização da bibloteca gráfica swing do Java permitiu o desenho de uma interface clean e user-friendly que permitiu assim uma maior fluidez na interligação com o Java e as libs necessárias.
+\textit{Last but not least}, a boa performance do programa foi atingida, sendo a nossa solução eficiente, tal como pode ser verificado com mais detalhe no Capítulo 3.
 
-O principal problema de memória que tivemos numa fase inicial foi aquando da cifra, devido ao heap do Java que facilmente esgotava a sua capacidade, pois a cifra estava a ser feita num toda. A alteração para cifra bloco a bloco resolveu este problema.
 
-Através da realização de testes à velocidade da operação de cifra podemos concluir que o sistema apresenta boa performance. A análise da performance do sistema pode ser vista, já de seguida, na secção~\ref{section:performance}
+\clearpage
+\newpage
 
-\section{Análise de Performance}
-\label{section:performance}
-
-FALTA FAZER
