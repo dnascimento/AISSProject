@@ -1,0 +1,36 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+%     File: Thesis_Conclusions.tex                                     %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% !TEX root = IST_Report.tex
+\chapter{Conclusão}
+\label{chapter:conclusions}
+
+Tendo em conta os principais desafios que foram apresentados no ínicio do trabalho como:
+\begin{itemize}
+\item Possíveis problemas de memória
+\item Assegurar eficiência nas operações
+\item Cartão de Cidadão com uma biblioteca instável
+\end{itemize}
+Mas também os principais objectivos, como:
+\begin{itemize}
+\item Ter uma interface user-friendly
+\item Ser um sistema compatível com aplicações que acedem a ficheiros
+\item Manter uma boa performance
+\end{itemize}
+
+Podemos concluir que os resultados obtidos foram muito adequados.
+A grande maioria dos problemas que poderiam vir a existir foram resolvidos. Naturalmente que haveria sempre melhorias a executar como tornar o Sistema compatível com outros Sistemas Operativos assim como ser mais flexível e menos condicional a interacção com outros Clientes de Email para além do Thunderbird.
+
+Apesar de ser uma biblioteca instável e de haver o relato de alguns problemas de utilização com o Mac OS, a biblioteca do Cartão de Cidadão demonstrou um bom desempenho ao longo do tempo de desenvolvimento do projecto, raramente falhando.
+A utilização da bibloteca gráfica swing do Java permitiu o desenho de uma interface clean e user-friendly que permitiu assim uma maior fluidez na interligação com o Java e as libs necessárias.
+
+O principal problema de memória que tivemos numa fase inicial foi aquando da cifra, devido ao heap do Java que facilmente esgotava a sua capacidade, pois a cifra estava a ser feita num toda. A alteração para cifra bloco a bloco resolveu este problema.
+
+Através da realização de testes à velocidade da operação de cifra podemos concluir que o sistema apresenta boa performance. A análise da performance do sistema pode ser vista, já de seguida, na secção~\ref{section:performance}
+
+\section{Análise de Performance}
+\label{section:performance}
+
+FALTA FAZER

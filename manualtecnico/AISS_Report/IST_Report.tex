@@ -1,0 +1,97 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Thesis.tex %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                      %
+%  --------------------- IST Report template -------------------       %
+%                                                                      %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Preamble                                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------------------
+%  Set the document class
+% ----------------------------------------------------------------------
+%\documentclass[12pt,a4paper,twoside]{report}
+\documentclass[12pt,a4paper,oneside]{report}
+
+% ----------------------------------------------------------------------
+% Define external packages, language, margins, fonts and new commands
+% ----------------------------------------------------------------------
+\input{IST_Report_Preamble} % file "IST_Report_Preamble.tex"
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     Begin Document                                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+% Set plain page style (no headers, footer with centered page number)
+\pagestyle{plain}
+
+% Set roman numbering (i,ii,...) before the start of chapters
+\pagenumbering{roman}
+
+% ----------------------------------------------------------------------
+%  Cover page
+% ----------------------------------------------------------------------
+\input{IST_Report_FrontCover} % file "IST_Report_FrontCover.tex"
+
+% ----------------------------------------------------------------------
+%  Table of contents, list of tables, list of figures and nomenclature
+% ----------------------------------------------------------------------
+
+% Table of contents
+%
+\tableofcontents
+\clearpage 
+
+\begingroup 
+  \let\clearpage\relax
+  \let\cleardoublepage\relax
+  \let\cleardoublepage\relax
+% List of tables
+%
+% Generate list
+%\listoftables
+% Add entry in the table of contents as section
+%\addcontentsline{toc}{section}{\listtablename}
+
+% List of figures
+%
+% Generate list
+%\listoffigures
+% Add entry in the table of contents as section
+%\addcontentsline{toc}{section}{\listfigurename}
+%\endgroup
+% Set arabic numbering (1,2,...) after preface
+%
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+% ----------------------------------------------------------------------
+%  Chapters - add new .tex files for new chapters
+% ----------------------------------------------------------------------
+
+\input{IST_Report_Introduction} % file "IST_Report_Introduction.tex"
+\input{IST_Report_Architecture} % file "IST_Report_Architecture.tex"
+\input{IST_Report_Conclusions} % file "IST_Report_Conclusions.tex"
+
+% ----------------------------------------------------------------------
+%  Bibliography
+% ----------------------------------------------------------------------
+%\bibliographystyle{IEEEtran}
+% > entries ordered in the order in which the citations appear, with numeric reference markers
+
+% External bibliography database file in the BibTeX format
+%\cleardoublepage
+%\bibliography{IST_Report_bib_DB} % file "IST_Report_bib_DB.bib"
+% Add entry in the table of contents as chapter
+%\addcontentsline{toc}{chapter}{\bibname}
+
+% ----------------------------------------------------------------------
+%  Appendix (optional)
+% ----------------------------------------------------------------------
+%\appendix
+%\input{IST_Report_Appendix} % file "Thesis_Appendix.tex"
+
+% ----------------------------------------------------------------------
+\end{document}
+% ----------------------------------------------------------------------
+
