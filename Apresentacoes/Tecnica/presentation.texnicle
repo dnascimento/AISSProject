@@ -87,10 +87,10 @@
         <relationship name="selected" type="1/1" destination="FILE" idrefs="z105"></relationship>
         <relationship name="settings" type="1/1" destination="SETTINGS" idrefs="z102"></relationship>
         <relationship name="uisettings" type="1/1" destination="UISETTINGS" idrefs="z104"></relationship>
-        <relationship name="items" type="0/0" destination="PROJECTITEM" idrefs="z109 z113 z105 z111 z106 z108 z107 z110 z114 z112"></relationship>
+        <relationship name="items" type="0/0" destination="PROJECTITEM" idrefs="z112 z113 z111 z108 z109 z107 z114 z105 z106 z110"></relationship>
     </object>
     <object type="UISETTINGS" id="z104">
-        <attribute name="pdfviewscrollrect" type="string">{{0, 13353}, {986, 932}}</attribute>
+        <attribute name="pdfviewscrollrect" type="string">{{0, 6241}, {346, 552}}</attribute>
         <attribute name="selectedcontrolstab" type="int16">3</attribute>
         <attribute name="maxoutlinedepth" type="int16">7</attribute>
         <attribute name="editorwidth" type="float">680</attribute>
@@ -98,12 +98,12 @@
         <relationship name="project" type="1/1" destination="PROJECT" idrefs="z103"></relationship>
     </object>
     <object type="TEXFILE" id="z105">
-        <attribute name="visiblerect" type="string">{{0, 728}, {628, 802}}</attribute>
+        <attribute name="visiblerect" type="string">{{0, 728}, {628, 368}}</attribute>
         <attribute name="cursor" type="string">{2327, 0}</attribute>
         <attribute name="wasopen" type="bool">5</attribute>
         <attribute name="lasteditdate" type="date">390189951.22202402353286743164</attribute>
         <attribute name="istext" type="bool">1</attribute>
-        <attribute name="fileloaddate" type="date">390189954.34014302492141723633</attribute>
+        <attribute name="fileloaddate" type="date">391374915.05189102888107299805</attribute>
         <attribute name="extension" type="string">tex</attribute>
         <attribute name="sortindex" type="int32">8</attribute>
         <attribute name="name" type="string">overview.tex</attribute>
@@ -121,7 +121,7 @@
         <attribute name="wasopen" type="bool">7</attribute>
         <attribute name="lasteditdate" type="date">390187680.18791002035140991211</attribute>
         <attribute name="istext" type="bool">1</attribute>
-        <attribute name="fileloaddate" type="date">390188970.16896802186965942383</attribute>
+        <attribute name="fileloaddate" type="date">391374915.05332201719284057617</attribute>
         <attribute name="extension" type="string">tex</attribute>
         <attribute name="sortindex" type="int32">6</attribute>
         <attribute name="name" type="string">results.tex</attribute>
@@ -162,7 +162,7 @@
         <attribute name="visiblerect" type="string">{{2, 0}, {455, 802}}</attribute>
         <attribute name="lasteditdate" type="date">390187680.17821902036666870117</attribute>
         <attribute name="istext" type="bool">1</attribute>
-        <attribute name="fileloaddate" type="date">390188970.08015298843383789062</attribute>
+        <attribute name="fileloaddate" type="date">391374914.94165098667144775391</attribute>
         <attribute name="extension" type="string">tex</attribute>
         <attribute name="cursor" type="string">{999, 17}</attribute>
         <attribute name="sortindex" type="int32">0</attribute>
@@ -197,7 +197,7 @@
         <attribute name="wasopen" type="bool">6</attribute>
         <attribute name="lasteditdate" type="date">390187680.18562000989913940430</attribute>
         <attribute name="istext" type="bool">1</attribute>
-        <attribute name="fileloaddate" type="date">390188970.16642397642135620117</attribute>
+        <attribute name="fileloaddate" type="date">391374915.04844498634338378906</attribute>
         <attribute name="extension" type="string">tex</attribute>
         <attribute name="sortindex" type="int32">7</attribute>
         <attribute name="name" type="string">architecture.tex</attribute>
@@ -221,7 +221,7 @@
         <attribute name="wasopen" type="bool">2</attribute>
         <attribute name="lasteditdate" type="date">390187680.18972200155258178711</attribute>
         <attribute name="istext" type="bool">1</attribute>
-        <attribute name="fileloaddate" type="date">390188970.16732597351074218750</attribute>
+        <attribute name="fileloaddate" type="date">391374915.04928702116012573242</attribute>
         <attribute name="extension" type="string">tex</attribute>
         <attribute name="sortindex" type="int32">9</attribute>
         <attribute name="name" type="string">conclusion.tex</attribute>
