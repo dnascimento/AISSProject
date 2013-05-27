@@ -3,7 +3,7 @@
 \section{Results}
 \begin{frame}{Results}
 
-\begin{block}{Simulation}
+\begin{block}{Environment}
 \begin{itemize}
 \item MacBook Pro 2.9 GHz Intel Core i7
 \item 8 GB memory 1600 MHz DDR3, SSD disk
@@ -17,7 +17,6 @@
 \item \textit{Total Size: 100 MBytes}
 \end{itemize}
 \end{block}	
-\end{frame}
 
 %\begin{table}[H]
 %	\centering
@@ -31,77 +30,33 @@
 %====================================================================================
 \begin{frame}{Results \\ \small Trace-driven simulation experiments}
 
-
-\begin{itemize}
-\item \textbf{Compression: } From $100MB$ to $95.5MB$. This value depends on the content and format of original files. Average Time: $4484ms$, Standard Deviation: $30ms$. 
-\item \textbf{Hashing: } Average Time: $700ms$,  Standard Deviation: $10ms$.
-\item \textbf{Signature with Citizen Card:} Average Time: $936ms$, Standard Deviation: $24ms$. 
-\item \textbf{Timestamp: } Average Time: $70ms$, Standard Deviation: $5ms$.
-\item \textbf{To Base64 and persistent write: }Average Time: $1335ms$, Standard Deviation: $35ms$. With Base64 file proportion increases $8/6$ - final size: $130.7MB$.
-\item  \textbf{From Base64}Average Time: $1380ms$, Standard Deviation: $32ms$.
-\item \textbf{Timestamp Verification: } Average Time: $32ms$, Standard Deviation: $6ms$.
-\item  \textbf{Signature Verification: } Average Time: $6ms$, Standard Deviation: $3ms$.
-\item \textbf{Cipher/Decipher: } Technical specification of box is: $60 seconds$ for each $100MB$, 
-\end{itemize}
-
-Total time for sending process (excluding cipher) \textbf{6 seconds}\\
-Total time for reception process: \textbf{3 seconds}. \\
-
-%\begin{figure}[H]
-%	\centering
-%	\includegraphics[width=0.9\textwidth]{images/fig4.pdf}	
-% 	\caption{Comparison of total offloading delay for four different decision-making algorithms.}
-%	\label{fig:}
-%\end{figure}
-
-\end{frame}
-
-%==============================================================================
-\begin{frame}{Results \\ \small Prototype experiments}
-\begin{block}{Mobile Device (emulated)}
-\begin{itemize}
-\item 266 MHz HP laptop;
-\item 11 Mbps 802.11b
-\end{itemize}
-\end{block}	
-
-\begin{block}{Surrogate}
-\begin{itemize}
-\item 733 MHz HP Kayak PC workstation
-\item 128 Mbytes of RAM
-\end{itemize}
-\end{block}	
-
-\begin{block}{Network}
-\begin{itemize}
-\item 10Mbps
-\end{itemize}
-\end{block}	
+\textbf{Compression: }  100MB to 95.5MB. \\
+\textbf{Cipher/Decipher: }  100MB in 60 seconds\\ 
+\vspace{0.5cm}
+\textbf{Sending:} 6 seconds \footnote{excluding cipher}\\
+\textbf{Reception:} 3 seconds \\
 
 
 \end{frame}
 
-\begin{frame}{Results \\ \small Prototype experiments}
 
 
-%\begin{figure}[H]
-%	\centering
-%	\includegraphics[width=0.8\textwidth]{images/fig5.pdf}	
-%	\caption{Execution time of two applications under the offloading prototype. The bars show the time until the %executions exited. The X’s indicate that the applications failed before completion.}
-%	\label{fig:}
-%\end{figure}
-
-
+%====================================================================================
+\begin{frame}{Results \\ \small Trace-driven simulation experiments}
+\begin{tabular}{|c|c|c|}\hline
+\textbf{Phase} & \textbf{Time} (ms) & \textbf{St. Deviation} (ms) \\ \hline
+\textbf{Compression }& 4484 & 30 \\ \hline
+\textbf{Hashing} & 700 & 10  \\ \hline
+\textbf{Signature} & 936 & 24  \\ \hline
+\textbf{Timestamp} & 70 & 5  \\ \hline
+\textbf{To Base64 Write} & 1335 & 35  \\ \hline
+\textbf{From Base64 }& 1380 & 32  \\ \hline
+\textbf{Timestamp Check} & 32  & 6  \\ \hline
+\textbf{Signature Check} & 6 & 3  \\ \hline
+\end{tabular}
 \end{frame}
 
-\begin{frame}{Results \\ \small Prototype experiments}
 
 
-\begin{block}{Offloading, constrained memory}
-\begin{itemize}
-\item 1.5\% - 5.7\% more slow;
-\item Cost of monitoring, remote accesses and partitioning increases the execution time.
-\end{itemize}
-\end{block}	
-\end{frame}
+
 
