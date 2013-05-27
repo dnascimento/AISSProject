@@ -2,13 +2,22 @@
 %====================================================================================	 
 \section{Results}
 \begin{frame}{Results}
-Fazer um teste para ver quanto tempo a zippar
-Quanto tempo a assinar
-Quanto tempo a cifrar
-Isto para um ficheiro grande
 
+\begin{block}{Simulation}
+\begin{itemize}
+\item MacBook Pro 2.9 GHz Intel Core i7
+\item 8 GB memory 1600 MHz DDR3, SSD disk
+\item Mac OS X 10.8.3
+\end{itemize}
+\end{block}	
 
-Tempo de utilização para uma pessoa comum	
+\begin{block}{Performance metrics}
+\begin{itemize}
+\item \textit{286 documents (PDF and Word)}
+\item \textit{Total Size: 100 MBytes}
+\end{itemize}
+\end{block}	
+\end{frame}
 
 %\begin{table}[H]
 %	\centering
@@ -22,23 +31,21 @@ Tempo de utilização para uma pessoa comum
 %====================================================================================
 \begin{frame}{Results \\ \small Trace-driven simulation experiments}
 
-\begin{block}{Simulation}
-\begin{itemize}
-\item IBM Thinkpad T22
-\item HP's Chai JVM (limited to 7/8 Mbytes of Heap Size)
-\end{itemize}
-\end{block}	
 
-\begin{block}{Performance metrics}
 \begin{itemize}
-\item \textit{Total offloading delay}
-\item \textit{Average interaction stretch}
-\item \textit{Total bandwidth requirement}
+\item \textbf{Compression: } From $100MB$ to $95.5MB$. This value depends on the content and format of original files. Average Time: $4484ms$, Standard Deviation: $30ms$. 
+\item \textbf{Hashing: } Average Time: $700ms$,  Standard Deviation: $10ms$.
+\item \textbf{Signature with Citizen Card:} Average Time: $936ms$, Standard Deviation: $24ms$. 
+\item \textbf{Timestamp: } Average Time: $70ms$, Standard Deviation: $5ms$.
+\item \textbf{To Base64 and persistent write: }Average Time: $1335ms$, Standard Deviation: $35ms$. With Base64 file proportion increases $8/6$ - final size: $130.7MB$.
+\item  \textbf{From Base64}Average Time: $1380ms$, Standard Deviation: $32ms$.
+\item \textbf{Timestamp Verification: } Average Time: $32ms$, Standard Deviation: $6ms$.
+\item  \textbf{Signature Verification: } Average Time: $6ms$, Standard Deviation: $3ms$.
+\item \textbf{Cipher/Decipher: } Technical specification of box is: $60 seconds$ for each $100MB$, 
 \end{itemize}
-\end{block}	
-\end{frame}
 
-\begin{frame}{Results \\ \small Trace-driven simulation experiments}
+Total time for sending process (excluding cipher) \textbf{6 seconds}\\
+Total time for reception process: \textbf{3 seconds}. \\
 
 %\begin{figure}[H]
 %	\centering
