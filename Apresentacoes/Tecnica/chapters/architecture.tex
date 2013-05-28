@@ -26,16 +26,17 @@
 
 \begin{frame}{AISS Secure Mail \\ \small Citzen Card Signature}
 \begin{itemize}
-\item PKCS#11 Portuguese Citizen Card
+\item PKCS11 Portuguese Citizen Card
 \item SHA-1, RSA
+\item Sender Identification
+\item Signature Validation
 \end{itemize}
 \begin{figure}
 	\centering
-	\includegraphics[width=0.6\textwidth]{./images/certificate.pdf}	
+	\includegraphics[width=0.5\textwidth]{./images/certificate.pdf}	
  	\caption{Certificate Tree}
 	\label{fig:}
 \end{figure}
-
 \end{frame}
 
 
@@ -45,7 +46,7 @@
 \item Self signed RSA Keys;
 \item SHA-256;
 \item Retrieve hash from User and sign it
-\item Output: Kp(H(m),T),T
+\item Output: Kpriv(H(m),T),T
 \end{itemize}		
 \end{frame}
 

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.security.Key;
 import java.security.cert.X509Certificate;
@@ -83,6 +84,11 @@ public class Sender {
         // Cifrar com a caixa
         mimeObject.ciphered = encrypt;
         if (encrypt) {
+            InetAddress boxAddress = InetAddress.getByName("192.168.0.14");
+            boolean reachable = boxAddress.isReachable(4000);
+            if (!reachable) {
+                throw new Exception("Please, connect your box");
+            }
             System.out.println("Ciphered");
             AISSInterface.logsender.append("CIPHER - ciphering...\n");
             byte[] data = AISSUtils.ObjectToByteArray(mimeObject);
@@ -104,7 +110,6 @@ public class Sender {
             arquivoZip.delete();
         }
     }
-
 
     private static void SaveObjectToFile(String file, Object obj) throws Exception {
         // Base64 para guardar
@@ -131,6 +136,7 @@ public class Sender {
 
     }
 
+    @SuppressWarnings("unused")
     private static Key loadKey() throws Exception {
         if (sharedSecretKey != null) {
             return sharedSecretKey;
@@ -173,8 +179,8 @@ public class Sender {
     public static void openThunderbird(String file) {
         Runtime rt = Runtime.getRuntime();
         try {
-            Process pr = rt.exec(new String[] { "open", "/Applications/Thunderbird.app",
-                    "--args", "-compose", "attachment=" + file });
+            rt.exec(new String[] { "open", "/Applications/Thunderbird.app", "--args",
+                    "-compose", "attachment=" + file });
         } catch (IOException e) {
             AISSInterface.logsender.append("Thunderbird was not found in your system.\n");
         }

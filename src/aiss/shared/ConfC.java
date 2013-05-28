@@ -21,6 +21,6 @@ public class ConfC {
 
     public static int TS_SERVER_PORT = 43212;
     // 172.20.81.30
-    public static String TS_SERVER_HOST = "172.20.81.30";
+    public static String TS_SERVER_HOST = "127.0.0.1";
 
 }
